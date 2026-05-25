@@ -1,0 +1,52 @@
+<div class="input-wrapper">
+  <div class="input-bar" [class.has-text]="hasText">
+
+    <!-- Attach button -->
+    <button class="input-icon-btn" aria-label="Attach or voice prompt">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <!-- Text input -->
+    <input
+      #inputEl
+      type="text"
+      class="chat-input"
+      placeholder="Send a message..."
+      [value]="inputText()"
+      (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
+      autocomplete="off"
+      autocorrect="on"
+      spellcheck="true"
+      aria-label="Type your fashion request"
+    />
+
+    <!-- Mic button -->
+    <button class="input-icon-btn" aria-label="Voice input">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="6" y="1" width="6" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M3 9c0 3.314 2.686 6 6 6s6-2.686 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="9" y1="15" x2="9" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <!-- Send button -->
+    <button
+      class="send-btn"
+      [class.active]="hasText"
+      [disabled]="!hasText"
+      (click)="send()"
+      aria-label="Send message"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 12V2M7 2L2.5 6.5M7 2L11.5 6.5"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+  </div>
+
+  <p class="disclaimer">Way2Wear can make mistakes. Consider checking important info.</p>
+</div>

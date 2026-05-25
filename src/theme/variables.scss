@@ -1,0 +1,101 @@
+// ============================================
+// WAY2WEAR — DESIGN TOKEN SYSTEM
+// ============================================
+
+:root {
+  // ── FONTS ──────────────────────────────────
+  --font-primary:   'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display:   'Playfair Display', Georgia, serif;
+
+  // ── BRAND COLORS ───────────────────────────
+  --w2w-black:        #0A0A0A;
+  --w2w-charcoal:     #1A1A1A;
+  --w2w-dark:         #2C2C2C;
+  --w2w-mid:          #555555;
+  --w2w-soft:         #888884;
+  --w2w-muted:        #AEACAA;
+  --w2w-light:        #D4D1CB;
+
+  --w2w-gold:         #C5A05A;
+  --w2w-gold-deep:    #A07C30;
+  --w2w-gold-light:   #FBF4E6;
+  --w2w-gold-border:  #E8D5A3;
+
+  // ── BACKGROUNDS ────────────────────────────
+  --w2w-bg-primary:   #FFFFFF;
+  --w2w-bg-secondary: #F7F6F3;
+  --w2w-bg-tertiary:  #F0EEE9;
+  --w2w-bg-page:      #F0F2F5;
+  --w2w-bg-overlay:   rgba(0, 0, 0, 0.35);
+
+  // ── TEXT ───────────────────────────────────
+  --w2w-text-primary:   #0A0A0A;
+  --w2w-text-secondary: #555555;
+  --w2w-text-muted:     #888884;
+  --w2w-text-placeholder: #AEACAA;
+
+  // ── BORDERS ────────────────────────────────
+  --w2w-border:        #E5E2DC;
+  --w2w-border-strong: #D4D0C8;
+
+  // ── STATUS ─────────────────────────────────
+  --w2w-green:      #22C55E;
+  --w2w-red:        #EF4444;
+  --w2w-red-bg:     #FFF0F0;
+  --w2w-red-border: #FFD5D5;
+  --w2w-amber:      #F59E0B;
+
+  // ── RADIUS ─────────────────────────────────
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius-md:  14px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+  --radius-full: 9999px;
+
+  // ── SHADOWS ────────────────────────────────
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+
+  // ── TRANSITIONS ────────────────────────────
+  --transition-fast:   0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-drawer: 0.30s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ── SPACING ────────────────────────────────
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+
+  // ── IONIC OVERRIDES ────────────────────────
+  --ion-font-family: var(--font-primary);
+  --ion-background-color: var(--w2w-bg-primary);
+  --ion-text-color: var(--w2w-text-primary);
+  --ion-color-primary: var(--w2w-charcoal);
+  --ion-color-primary-rgb: 26, 26, 26;
+  --ion-color-primary-contrast: #FFFFFF;
+  --ion-color-primary-shade: var(--w2w-dark);
+  --ion-color-primary-tint: var(--w2w-mid);
+  --ion-toolbar-background: var(--w2w-bg-primary);
+  --ion-tab-bar-background: var(--w2w-bg-primary);
+  --ion-item-background: transparent;
+}
+
+// ── DARK MODE (future) ─────────────────────
+@media (prefers-color-scheme: dark) {
+  :root.dark {
+    --w2w-bg-primary:    #111111;
+    --w2w-bg-secondary:  #1C1C1C;
+    --w2w-bg-tertiary:   #242424;
+    --w2w-bg-page:       #0A0A0A;
+    --w2w-text-primary:  #F5F5F3;
+    --w2w-text-secondary:#A8A6A3;
+    --w2w-border:        #2E2E2C;
+    --w2w-border-strong: #3E3E3C;
+  }
+}

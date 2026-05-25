@@ -1,0 +1,301 @@
+// ============================================
+// HOME PAGE — WAY2WEAR
+// Matches way2wear-ai.vercel.app reference
+// ============================================
+
+// ── Page Shell ───────────────────────────
+.page-shell {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh; // dynamic viewport height for mobile
+  overflow: hidden;
+  background: var(--w2w-bg-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ── Overlay ──────────────────────────────
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--w2w-bg-overlay);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-drawer);
+  border-radius: inherit;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// ── Drawers ──────────────────────────────
+.drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  width: 280px;
+  transition: transform var(--transition-drawer);
+  box-shadow: var(--shadow-lg);
+
+  &.drawer-left {
+    left: 0;
+    transform: translateX(-100%);
+    border-right: 1px solid var(--w2w-border);
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    overflow: hidden;
+
+    &.open { transform: translateX(0); }
+  }
+
+  &.drawer-right {
+    right: 0;
+    transform: translateX(100%);
+    border-left: 1px solid var(--w2w-border);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    overflow: hidden;
+    width: 300px;
+
+    &.open { transform: translateX(0); }
+  }
+}
+
+// ── App Shell ────────────────────────────
+// This is the white mobile-style card visible in browser
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  background: var(--w2w-bg-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  // Card effect on desktop (visible as white panel on gray bg)
+  @media (min-width: 520px) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+// ══════════════════════════════════════════
+// NAVBAR
+// ══════════════════════════════════════════
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 54px;
+  background: var(--w2w-bg-primary);
+  border-bottom: 1px solid var(--w2w-border);
+  flex-shrink: 0;
+  z-index: 10;
+  // iOS safe area top
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(54px + env(safe-area-inset-top, 0px));
+
+  .navbar-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--w2w-text-primary);
+    letter-spacing: -0.3px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-xs);
+  color: var(--w2w-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  z-index: 1;
+
+  &:hover { background: var(--w2w-bg-secondary); }
+  &:active { background: var(--w2w-bg-tertiary); }
+}
+
+.profile-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--w2w-border-strong);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--w2w-text-primary);
+  transition: var(--transition-fast);
+  z-index: 1;
+
+  &:hover {
+    background: var(--w2w-bg-secondary);
+    border-color: var(--w2w-border-strong);
+  }
+}
+
+// ══════════════════════════════════════════
+// MAIN CONTENT
+// ══════════════════════════════════════════
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--w2w-bg-primary);
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--w2w-border);
+    border-radius: 3px;
+  }
+}
+
+// ══════════════════════════════════════════
+// HERO / EMPTY STATE
+// ══════════════════════════════════════════
+.hero-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 28px 24px;
+  min-height: 400px;
+}
+
+.hero-inner {
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+}
+
+.hero-title {
+  font-size: clamp(36px, 10vw, 48px);
+  font-weight: 800;
+  color: var(--w2w-text-primary);
+  line-height: 1.05;
+  letter-spacing: -2.5px;
+  margin: 0 0 20px;
+  font-family: var(--font-primary);
+}
+
+.hero-sub1 {
+  font-size: 16px;
+  color: var(--w2w-text-secondary);
+  margin: 0 0 8px;
+  font-weight: 400;
+}
+
+.hero-sub2 {
+  font-size: 14px;
+  color: var(--w2w-text-muted);
+  margin: 0 0 32px;
+  font-weight: 400;
+}
+
+// ── Suggestion Chips ─────────────────────
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.chip {
+  padding: 9px 15px;
+  background: var(--w2w-bg-secondary);
+  border: 1px solid var(--w2w-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--w2w-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--w2w-bg-tertiary);
+    border-color: var(--w2w-border-strong);
+    color: var(--w2w-text-primary);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// ══════════════════════════════════════════
+// MESSAGES LIST
+// ══════════════════════════════════════════
+.messages-list {
+  flex: 1;
+  padding: 22px 14px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-anchor {
+  height: 1px;
+  flex-shrink: 0;
+}
+
+// ══════════════════════════════════════════
+// FOOTER
+// ══════════════════════════════════════════
+.input-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--w2w-border);
+  background: var(--w2w-bg-primary);
+}
+
+// ══════════════════════════════════════════
+// RESPONSIVE — DESKTOP EXPERIENCE
+// ══════════════════════════════════════════
+@media (min-width: 768px) {
+  .page-shell {
+    background: var(--w2w-bg-page);
+  }
+
+  .app-shell {
+    max-width: 520px;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .drawer {
+    // On desktop, constrain drawers to app shell width
+    &.drawer-left { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    &.drawer-right { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+  }
+
+  .hero-title {
+    font-size: 48px;
+    letter-spacing: -3px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-shell {
+    max-width: 100%;
+    height: 100vh;
+  }
+}

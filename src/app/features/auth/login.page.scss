@@ -1,0 +1,340 @@
+// ============================================
+// LOGIN PAGE — WAY2WEAR
+// Phone OTP authentication
+// ============================================
+
+.login-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: var(--w2w-bg-page);
+  font-family: var(--font-primary);
+}
+
+// ── Card ─────────────────────────────────
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--w2w-bg-primary);
+  border-radius: 20px;
+  padding: 36px 28px 32px;
+  border: 1px solid var(--w2w-border);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+
+// ── Brand Header ─────────────────────────
+.brand-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--w2w-charcoal);
+  color: var(--w2w-gold);
+  font-size: 22px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  letter-spacing: -1px;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--w2w-text-primary);
+  letter-spacing: -0.8px;
+  margin: 0 0 6px;
+}
+
+.brand-tagline {
+  font-size: 14px;
+  color: var(--w2w-text-muted);
+  margin: 0;
+}
+
+// ── Step heading ─────────────────────────
+.step-heading {
+  margin-bottom: 22px;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--w2w-text-primary);
+    letter-spacing: -0.4px;
+    margin: 0 0 5px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--w2w-text-muted);
+    margin: 0;
+
+    strong {
+      color: var(--w2w-text-secondary);
+      font-weight: 600;
+    }
+  }
+}
+
+// ── Phone Row ────────────────────────────
+.phone-row {
+  display: flex;
+  align-items: center;
+  background: var(--w2w-bg-secondary);
+  border: 1.5px solid var(--w2w-border);
+  border-radius: 12px;
+  height: 54px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: var(--w2w-charcoal);
+    background: var(--w2w-bg-primary);
+  }
+}
+
+.country-code {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  flex-shrink: 0;
+
+  .flag { font-size: 18px; }
+
+  .code {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--w2w-text-primary);
+    letter-spacing: -0.2px;
+  }
+}
+
+.divider-v {
+  width: 1px;
+  height: 26px;
+  background: var(--w2w-border);
+  flex-shrink: 0;
+}
+
+.phone-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--w2w-text-primary);
+  letter-spacing: 0.5px;
+  padding: 0 14px;
+  height: 100%;
+  outline: none;
+  min-width: 0;
+
+  &::placeholder { color: var(--w2w-text-placeholder); font-weight: 400; letter-spacing: 0; }
+}
+
+// ── OTP Boxes ────────────────────────────
+.otp-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  justify-content: space-between;
+}
+
+.otp-box {
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 52px;
+  text-align: center;
+  font-family: var(--font-primary);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--w2w-text-primary);
+  background: var(--w2w-bg-secondary);
+  border: 1.5px solid var(--w2w-border);
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.15s;
+  caret-color: transparent;
+
+  &:focus {
+    border-color: var(--w2w-charcoal);
+    background: var(--w2w-bg-primary);
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+  }
+
+  &:not(:placeholder-shown) {
+    border-color: var(--w2w-charcoal);
+    background: var(--w2w-bg-primary);
+  }
+}
+
+// ── CTA Button ───────────────────────────
+.cta-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--w2w-charcoal);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-bottom: 14px;
+  letter-spacing: -0.2px;
+
+  &:not([disabled]):hover { opacity: 0.88; }
+  &:not([disabled]):active { transform: scale(0.98); }
+  &[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+  &.loading { opacity: 0.7; cursor: wait; }
+}
+
+// ── Spinner ──────────────────────────────
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Error text ───────────────────────────
+.error-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: var(--w2w-red);
+  margin: 0 0 14px;
+  background: var(--w2w-red-bg);
+  border: 1px solid var(--w2w-red-border);
+  padding: 9px 12px;
+  border-radius: 8px;
+  line-height: 1.4;
+}
+
+// ── Terms ────────────────────────────────
+.terms-note {
+  font-size: 12px;
+  color: var(--w2w-text-muted);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+}
+
+// ── Back button ──────────────────────────
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 13.5px;
+  color: var(--w2w-text-muted);
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+
+  &:hover { color: var(--w2w-text-primary); }
+}
+
+// ── Resend row ───────────────────────────
+.resend-row {
+  text-align: center;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resend-wait {
+  font-size: 13.5px;
+  color: var(--w2w-text-muted);
+
+  strong { color: var(--w2w-text-secondary); }
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--w2w-charcoal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.7; }
+}
+
+// ── Dev hint ─────────────────────────────
+.dev-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--w2w-gold-light);
+  border: 1px solid var(--w2w-gold-border);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #7A5C1A;
+  margin-bottom: 16px;
+
+  strong {
+    font-size: 18px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    color: var(--w2w-gold-deep);
+  }
+}
+
+// ── Footer ───────────────────────────────
+.login-footer {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--w2w-text-muted);
+  text-align: center;
+}
+
+// ── Mobile adjustments ───────────────────
+@media (max-width: 420px) {
+  .login-card {
+    padding: 28px 20px 24px;
+    border-radius: 16px;
+  }
+
+  .otp-box {
+    max-width: 44px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .otp-row { gap: 6px; }
+}

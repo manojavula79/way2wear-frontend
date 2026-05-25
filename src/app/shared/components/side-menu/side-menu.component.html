@@ -1,0 +1,82 @@
+<div class="side-menu">
+
+  <!-- Header -->
+  <div class="menu-header">
+    <button class="new-session-btn" (click)="onNewSession()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      New style session
+    </button>
+    <button class="close-btn" (click)="close()" aria-label="Close menu">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- History list -->
+  <div class="history-section">
+
+    <p class="section-label">History</p>
+
+    <!-- Session items -->
+    <div
+      class="history-item"
+      *ngFor="let session of sessions()"
+      [class.active]="session.id === currentSessionId()"
+      (click)="onSelectSession(session)"
+    >
+      <svg class="chat-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M13 8.5A5.5 5.5 0 1 1 5.5 3a5.5 5.5 0 0 1 7.5 5.5Z" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M5.5 9.5L3 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span class="session-title">{{ session.title }}</span>
+      <button
+        class="delete-btn"
+        (click)="onDeleteSession($event, session.id)"
+        aria-label="Delete session"
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-history" *ngIf="sessions().length === 0">
+      <p>No sessions yet.<br />Start a style session!</p>
+    </div>
+
+  </div>
+
+  <!-- Saved Looks shortcut -->
+  <div class="menu-shortcuts">
+    <div class="shortcut-item">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M7.5 13L2 8a3.5 3.5 0 0 1 5.5-4.3A3.5 3.5 0 0 1 13 8l-5.5 5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+      <span>Saved Looks</span>
+    </div>
+    <div class="shortcut-item">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <rect x="1" y="3" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M5 3V2m5 1V2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span>Styling Sessions</span>
+    </div>
+  </div>
+
+  <!-- Footer / User info -->
+  <div class="menu-footer">
+    <div class="user-avatar">W2</div>
+    <div class="user-info">
+      <p class="user-name">Way2Wear AI</p>
+      <p class="user-status">
+        <span class="status-dot"></span>
+        Stylist active
+      </p>
+    </div>
+  </div>
+
+</div>

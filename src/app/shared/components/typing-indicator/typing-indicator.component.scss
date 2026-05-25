@@ -1,0 +1,45 @@
+.typing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+  animation: fadeUp 0.25s ease;
+}
+
+.ai-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--w2w-charcoal);
+  color: var(--w2w-gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dots-container {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--w2w-text-muted);
+  display: block;
+  animation: typingBounce 1.3s ease-in-out infinite;
+
+  &:nth-child(2) { animation-delay: 0.18s; }
+  &:nth-child(3) { animation-delay: 0.36s; }
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30%           { transform: translateY(-6px); opacity: 1; }
+}

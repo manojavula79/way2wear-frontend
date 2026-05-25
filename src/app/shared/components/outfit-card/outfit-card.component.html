@@ -1,0 +1,113 @@
+<div class="outfit-card">
+
+  <div class="card-header">
+    <span class="outfit-index">Outfit {{ index + 1 }}</span>
+    <h3 class="outfit-name">{{ outfit.name }}</h3>
+  </div>
+
+  <!-- Top + Bottom grid -->
+  <div class="product-grid">
+
+    <!-- TOP -->
+    <div class="product-card">
+      <div class="product-image" [style.background]="getSwatchBg(outfit.top.color)">
+        <!-- Real image -->
+        <img
+          *ngIf="outfit.top.image && !hasImgError('top')"
+          [src]="outfit.top.image"
+          [alt]="outfit.top.title"
+          class="product-img"
+          (error)="onImgError('top')"
+        />
+        <!-- Fallback swatch -->
+        <div *ngIf="!outfit.top.image || hasImgError('top')"
+          class="color-swatch" [style.background]="outfit.top.color">
+        </div>
+        <span class="brand-badge" *ngIf="outfit.top.brand">{{ outfit.top.brand }}</span>
+      </div>
+      <div class="product-info">
+        <span class="product-type">TOP</span>
+        <p class="product-title">{{ outfit.top.title || 'Top Wear' }}</p>
+        <p class="product-price" *ngIf="outfit.top.price">${{ outfit.top.price }}</p>
+        <button class="view-btn" (click)="openLink(outfit.top.url)">
+          View Details
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M1 9L9 1M9 1H4M9 1V6" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="product-card">
+      <div class="product-image" [style.background]="getSwatchBg(outfit.bottom.color)">
+        <img
+          *ngIf="outfit.bottom.image && !hasImgError('bottom')"
+          [src]="outfit.bottom.image"
+          [alt]="outfit.bottom.title"
+          class="product-img"
+          (error)="onImgError('bottom')"
+        />
+        <div *ngIf="!outfit.bottom.image || hasImgError('bottom')"
+          class="color-swatch" [style.background]="outfit.bottom.color">
+        </div>
+        <span class="brand-badge" *ngIf="outfit.bottom.brand">{{ outfit.bottom.brand }}</span>
+      </div>
+      <div class="product-info">
+        <span class="product-type">BOTTOM</span>
+        <p class="product-title">{{ outfit.bottom.title || 'Bottom Wear' }}</p>
+        <p class="product-price" *ngIf="outfit.bottom.price">${{ outfit.bottom.price }}</p>
+        <button class="view-btn" (click)="openLink(outfit.bottom.url)">
+          View Details
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M1 9L9 1M9 1H4M9 1V6" stroke="currentColor"
+              stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ACCESSORY -->
+  <div class="accessory-card" *ngIf="outfit.accessory && outfit.accessory.title">
+    <div class="accessory-img-wrap">
+      <img
+        *ngIf="outfit.accessory.image && !hasImgError('acc')"
+        [src]="outfit.accessory.image"
+        [alt]="outfit.accessory.title"
+        class="accessory-img"
+        (error)="onImgError('acc')"
+      />
+      <div *ngIf="!outfit.accessory.image || hasImgError('acc')"
+        class="accessory-swatch" [style.background]="outfit.accessory.color">
+      </div>
+    </div>
+    <div class="accessory-info">
+      <span class="product-type">ACCESSORY</span>
+      <p class="product-title">{{ outfit.accessory.title }}</p>
+      <div class="accessory-row">
+        <span class="product-price" *ngIf="outfit.accessory.price">
+          ${{ outfit.accessory.price }}
+        </span>
+        <span class="brand-badge inline" *ngIf="outfit.accessory.brand">
+          {{ outfit.accessory.brand }}
+        </span>
+      </div>
+    </div>
+    <button class="view-btn-sm" (click)="openLink(outfit.accessory.url)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 12L12 2M12 2H6M12 2V8" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Note -->
+  <div class="compat-note" *ngIf="outfit.note">
+    <span class="compat-icon">✦</span>
+    <p>{{ outfit.note }}</p>
+  </div>
+
+</div>

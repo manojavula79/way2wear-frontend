@@ -1,0 +1,93 @@
+.input-wrapper {
+  padding: 10px 16px 16px;
+  background: var(--w2w-bg-primary);
+  // iOS safe area
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--w2w-bg-secondary);
+  border: 1px solid var(--w2w-border);
+  border-radius: var(--radius-full);
+  padding: 7px 8px 7px 14px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+
+  &:focus-within {
+    border-color: var(--w2w-border-strong);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  }
+
+  &.has-text {
+    border-color: var(--w2w-border-strong);
+  }
+}
+
+.chat-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-primary);
+  font-size: 15px;
+  color: var(--w2w-text-primary);
+  outline: none;
+  min-width: 0;
+
+  &::placeholder { color: var(--w2w-text-placeholder); }
+}
+
+.input-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  color: var(--w2w-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+
+  &:hover {
+    color: var(--w2w-text-secondary);
+    background: var(--w2w-bg-tertiary);
+  }
+}
+
+.send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+
+  background: transparent;
+  color: var(--w2w-text-muted);
+
+  &.active {
+    background: var(--w2w-charcoal);
+    color: #FFFFFF;
+  }
+
+  &:not([disabled]):active {
+    transform: scale(0.92);
+  }
+
+  &[disabled] { cursor: not-allowed; }
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--w2w-text-muted);
+  margin: 8px 0 0;
+  line-height: 1.4;
+}

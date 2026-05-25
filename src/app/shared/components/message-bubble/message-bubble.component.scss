@@ -1,0 +1,111 @@
+// ── User Message ─────────────────────────
+.user-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+  animation: fadeUp 0.3s ease;
+}
+
+.user-bubble {
+  background: var(--w2w-charcoal);
+  color: #FFFFFF;
+  padding: 12px 18px;
+  border-radius: 20px;
+  border-bottom-right-radius: 5px;
+  max-width: 82%;
+  font-size: 14.5px;
+  line-height: 1.55;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+// ── AI Message ──────────────────────────
+.ai-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+  animation: fadeUp 0.3s ease;
+}
+
+.ai-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--w2w-charcoal);
+  color: var(--w2w-gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ai-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-text {
+  font-size: 14.5px;
+  color: var(--w2w-text-primary);
+  line-height: 1.72;
+  margin: 0 0 14px;
+  font-weight: 400;
+}
+
+// ── Tip Box ──────────────────────────────
+.tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  background: var(--w2w-gold-light);
+  border: 1px solid var(--w2w-gold-border);
+  border-radius: var(--radius-xs);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  animation: fadeUp 0.35s ease 0.05s both;
+
+  .tip-icon {
+    color: var(--w2w-gold-deep);
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  p {
+    font-size: 13.5px;
+    color: #7A5C1A;
+    line-height: 1.55;
+    margin: 0;
+  }
+}
+
+// ── Error ────────────────────────────────
+.error-msg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--w2w-red);
+  background: var(--w2w-red-bg);
+  border: 1px solid var(--w2w-red-border);
+  border-radius: var(--radius-xs);
+  padding: 10px 14px;
+}
+
+// ── Empty ────────────────────────────────
+.empty-outfits {
+  padding: 10px 14px;
+  background: var(--w2w-bg-secondary);
+  border-radius: var(--radius-xs);
+  font-size: 14px;
+  color: var(--w2w-text-secondary);
+  line-height: 1.55;
+  margin-top: 2px;
+
+  p { margin: 0; }
+}

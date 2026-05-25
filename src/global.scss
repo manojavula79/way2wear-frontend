@@ -1,0 +1,153 @@
+// ============================================
+// WAY2WEAR - GLOBAL STYLES
+// ============================================
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  background-color: var(--w2w-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// ============================================
+// IONIC RESETS
+// ============================================
+
+ion-app {
+  background: var(--w2w-bg-page);
+}
+
+ion-content {
+  --background: var(--w2w-bg-primary);
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+ion-toolbar {
+  --background: var(--w2w-bg-primary);
+  --border-color: var(--w2w-border);
+  --color: var(--w2w-text-primary);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --min-height: 56px;
+}
+
+ion-header {
+  box-shadow: none;
+  &::after { display: none; }
+}
+
+ion-footer {
+  box-shadow: none;
+  &::before { display: none; }
+  background: var(--w2w-bg-primary);
+  border-top: 1px solid var(--w2w-border);
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: var(--w2w-border);
+  --color: var(--w2w-text-primary);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+ion-button {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  letter-spacing: -0.2px;
+}
+
+ion-menu {
+  --background: var(--w2w-bg-primary);
+  --width: 280px;
+}
+
+// ============================================
+// SCROLLBAR STYLING
+// ============================================
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--w2w-border-strong);
+  border-radius: 4px;
+}
+
+// ============================================
+// UTILITY CLASSES
+// ============================================
+
+.text-muted { color: var(--w2w-text-muted) !important; }
+.text-secondary { color: var(--w2w-text-secondary) !important; }
+.text-primary { color: var(--w2w-text-primary) !important; }
+.text-gold { color: var(--w2w-gold) !important; }
+
+.animate-fade-up {
+  animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-6px); }
+}
+
+@keyframes typingPulse {
+  0%, 80%, 100% { transform: scale(1); opacity: 0.5; }
+  40%           { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes shimmer {
+  from { background-position: -200px 0; }
+  to   { background-position: calc(200px + 100%) 0; }
+}
+
+// ============================================
+// SKELETON LOADING
+// ============================================
+
+.skeleton {
+  background: linear-gradient(90deg, var(--w2w-bg-secondary) 0px, var(--w2w-bg-tertiary) 50%, var(--w2w-bg-secondary) 100%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+// ============================================
+// SAFE AREA SUPPORT (iOS / Android)
+// ============================================
+
+.safe-area-top    { padding-top:    env(safe-area-inset-top, 0px); }
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }

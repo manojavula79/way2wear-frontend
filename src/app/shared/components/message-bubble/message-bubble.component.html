@@ -1,0 +1,49 @@
+<!-- USER MESSAGE -->
+<div class="user-row" *ngIf="isUser">
+  <div class="user-bubble">{{ message.content }}</div>
+</div>
+
+<!-- AI MESSAGE -->
+<div class="ai-row" *ngIf="!isUser">
+  <div class="ai-avatar">W</div>
+
+  <div class="ai-body">
+
+    <!-- Error state -->
+    <div class="error-msg" *ngIf="message.error">
+      <span>⚠</span> {{ message.content }}
+    </div>
+
+    <!-- Normal AI response -->
+    <ng-container *ngIf="!message.error && parsedResponse">
+
+      <!-- Conversational message -->
+      <p class="ai-text">{{ parsedResponse.message }}</p>
+
+      <!-- Styling tip -->
+      <div class="tip-box" *ngIf="parsedResponse.tip">
+        <span class="tip-icon">✦</span>
+        <p>{{ parsedResponse.tip }}</p>
+      </div>
+
+      <!-- Outfit cards -->
+      <app-outfit-card
+        *ngFor="let outfit of parsedResponse.outfits; let i = index"
+        [outfit]="outfit"
+        [index]="i"
+      ></app-outfit-card>
+
+      <!-- Empty outfits fallback -->
+      <div class="empty-outfits" *ngIf="parsedResponse.outfits.length === 0 && parsedResponse.message">
+        <p>Try describing the occasion or style you're going for and I'll generate outfit cards for you!</p>
+      </div>
+
+    </ng-container>
+
+    <!-- Raw text fallback -->
+    <p class="ai-text" *ngIf="!message.error && !parsedResponse">
+      {{ message.content }}
+    </p>
+
+  </div>
+</div>

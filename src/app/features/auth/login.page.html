@@ -1,0 +1,137 @@
+<div class="login-shell">
+  <div class="login-card">
+
+    <div class="brand-header">
+      <div class="brand-logo">W</div>
+      <h1 class="brand-name">Way2Wear</h1>
+      <p class="brand-tagline">From idea to outfit in seconds</p>
+    </div>
+
+    <!-- STEP 1 — PHONE -->
+    <div class="step-block" *ngIf="step() === 'phone'">
+      <div class="step-heading">
+        <h2>Enter your phone number</h2>
+        <p>We'll send a one-time password to verify</p>
+      </div>
+
+      <div class="phone-row">
+        <div class="country-code">
+          <span class="flag">🇮🇳</span>
+          <span class="code">+91</span>
+        </div>
+        <div class="divider-v"></div>
+        <input
+          type="tel"
+          class="phone-input"
+          placeholder="10-digit mobile number"
+          maxlength="10"
+          inputmode="numeric"
+          [value]="phoneNumber()"
+          (input)="onPhoneInput($event)"
+          (keydown.enter)="sendOtp()"
+          autocomplete="tel-national"
+        />
+      </div>
+
+      <p class="error-text" *ngIf="error()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        {{ error() }}
+      </p>
+
+      <button
+        class="cta-btn"
+        [class.loading]="isLoading()"
+        [disabled]="!phoneValid || isLoading()"
+        (click)="sendOtp()"
+      >
+        <span *ngIf="!isLoading()">Send OTP</span>
+        <span class="spinner" *ngIf="isLoading()"></span>
+      </button>
+
+      <p class="terms-note">By continuing, you agree to our Terms of Service and Privacy Policy</p>
+    </div>
+
+    <!-- STEP 2 — OTP -->
+    <div class="step-block" *ngIf="step() === 'otp'">
+
+      <button class="back-btn" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Change number
+      </button>
+
+      <div class="step-heading">
+        <h2>Verify OTP</h2>
+        <p>Sent to <strong>{{ fullPhone }}</strong></p>
+      </div>
+
+      <!-- Dev OTP hint -->
+      <div class="dev-hint" *ngIf="devOtp()">
+        <span>Dev OTP:</span>
+        <strong>{{ devOtp() }}</strong>
+      </div>
+
+      <!-- 6 OTP boxes — keydown only, no (input) binding -->
+      <div class="otp-row" (paste)="onOtpPaste($event)">
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="one-time-code"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 0)" readonly />
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="off"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 1)" readonly />
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="off"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 2)" readonly />
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="off"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 3)" readonly />
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="off"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 4)" readonly />
+        <input #otpInput type="tel" class="otp-box" maxlength="1"
+          inputmode="numeric" autocomplete="off"
+          [disabled]="isLoading()"
+          (keydown)="onOtpKeydown($event, 5)" readonly />
+      </div>
+
+      <p class="error-text" *ngIf="error()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        {{ error() }}
+      </p>
+
+      <button
+        class="cta-btn"
+        [class.loading]="isLoading()"
+        [disabled]="!otpComplete || isLoading()"
+        (click)="verifyOtp()"
+      >
+        <span *ngIf="!isLoading()">Verify & Continue</span>
+        <span class="spinner" *ngIf="isLoading()"></span>
+      </button>
+
+      <div class="resend-row">
+        <span *ngIf="resendSeconds() > 0" class="resend-wait">
+          Resend OTP in <strong>{{ resendSeconds() }}s</strong>
+        </span>
+        <button *ngIf="resendSeconds() === 0" class="resend-btn" (click)="resendOtp()">
+          Resend OTP
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <p class="login-footer">Way2Wear · AI Fashion Stylist</p>
+</div>
