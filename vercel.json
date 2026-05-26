@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "outputDirectory": "www/browser",
+  "outputDirectory": "www",
   "routes": [
     {
       "src": "/(.*)",
