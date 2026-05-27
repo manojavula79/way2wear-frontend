@@ -1,10 +1,11 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
   "outputDirectory": "www",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
