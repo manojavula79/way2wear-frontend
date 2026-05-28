@@ -1,57 +1,91 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { initializeApp, FirebaseApp, getApps } from 'firebase/app';
+import {
+  getAuth, Auth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+} from 'firebase/auth';
 import { environment } from '../../../environments/environment';
-
-export interface OtpSendResponse {
-  message: string;
-  dev_otp?: string;   // only in dev mode
-}
+import { firstValueFrom, timeout } from 'rxjs';
 
 export interface AuthTokens {
-  access_token: string;
+  access_token:  string;
   refresh_token: string;
-  token_type: string;
-  expires_in: number;
+  token_type:    string;
+  expires_in:    number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
+  private http   = inject(HttpClient);
   private router = inject(Router);
+
+  private firebaseApp!: FirebaseApp;
+  private firebaseAuth!: Auth;
+  private recaptchaVerifier?: RecaptchaVerifier;
+  private confirmationResult?: ConfirmationResult;
 
   private readonly ACCESS_KEY  = 'w2w_access_token';
   private readonly REFRESH_KEY = 'w2w_refresh_token';
+  private readonly API_TIMEOUT = 15000;
 
   isAuthenticated = signal(this.hasValidToken());
   isLoading       = signal(false);
 
-  private readonly REQUEST_TIMEOUT_MS = 30_000;
+  constructor() {
+    if (getApps().length === 0) {
+      this.firebaseApp = initializeApp(environment.firebase);
+    } else {
+      this.firebaseApp = getApps()[0];
+    }
+    this.firebaseAuth = getAuth(this.firebaseApp);
+  }
 
-  // ── STEP 1: Send OTP ─────────────────
-  async sendOtp(phone: string): Promise<OtpSendResponse> {
+  initRecaptcha(containerId: string) {
+    try {
+      if (this.recaptchaVerifier) {
+        this.recaptchaVerifier.clear();
+      }
+      this.recaptchaVerifier = new RecaptchaVerifier(
+        this.firebaseAuth, containerId,
+        { size: 'invisible', callback: () => {} }
+      );
+    } catch (err) {
+      console.error('reCAPTCHA init error:', err);
+    }
+  }
+
+  async sendOtp(phone: string): Promise<void> {
     this.isLoading.set(true);
     try {
-      return await firstValueFrom(
-        this.http
-          .post<OtpSendResponse>(`${environment.apiUrl}/auth/send-otp`, { phone })
-          .pipe(timeout(this.REQUEST_TIMEOUT_MS))
+      if (!this.recaptchaVerifier) throw new Error('reCAPTCHA not initialized');
+      this.confirmationResult = await signInWithPhoneNumber(
+        this.firebaseAuth, phone, this.recaptchaVerifier
       );
+    } catch (err: any) {
+      this.recaptchaVerifier?.clear();
+      this.recaptchaVerifier = undefined;
+      throw err;
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  // ── STEP 2: Verify OTP → get JWT ─────
-  async verifyOtp(phone: string, otp: string): Promise<void> {
+  async verifyOtp(otp: string): Promise<void> {
+    if (!this.confirmationResult) throw new Error('Please request an OTP first');
     this.isLoading.set(true);
     try {
+      const result  = await this.confirmationResult.confirm(otp);
+      const idToken = await result.user.getIdToken();
+
       const tokens = await firstValueFrom(
-        this.http
-          .post<AuthTokens>(`${environment.apiUrl}/auth/verify-otp`, { phone, otp })
-          .pipe(timeout(this.REQUEST_TIMEOUT_MS))
+        this.http.post<AuthTokens>(
+          `${environment.apiUrl}/auth/firebase-verify`,
+          { id_token: idToken }
+        ).pipe(timeout(this.API_TIMEOUT))
       );
       this.saveTokens(tokens);
       this.isAuthenticated.set(true);
@@ -60,15 +94,15 @@ export class AuthService {
     }
   }
 
-  // ── Refresh token ─────────────────────
   async refreshAccessToken(): Promise<boolean> {
     const refresh = localStorage.getItem(this.REFRESH_KEY);
     if (!refresh) return false;
     try {
       const tokens = await firstValueFrom(
-        this.http
-          .post<AuthTokens>(`${environment.apiUrl}/auth/refresh`, { refresh_token: refresh })
-          .pipe(timeout(this.REQUEST_TIMEOUT_MS))
+        this.http.post<AuthTokens>(
+          `${environment.apiUrl}/auth/refresh`,
+          { refresh_token: refresh }
+        ).pipe(timeout(this.API_TIMEOUT))
       );
       this.saveTokens(tokens);
       return true;
@@ -78,11 +112,11 @@ export class AuthService {
     }
   }
 
-  // ── Logout ────────────────────────────
   logout() {
     localStorage.removeItem(this.ACCESS_KEY);
     localStorage.removeItem(this.REFRESH_KEY);
     this.isAuthenticated.set(false);
+    this.firebaseAuth.signOut().catch(() => {});
     this.router.navigate(['/login']);
   }
 
@@ -90,20 +124,17 @@ export class AuthService {
     return localStorage.getItem(this.ACCESS_KEY);
   }
 
-  private saveTokens(tokens: AuthTokens) {
-    localStorage.setItem(this.ACCESS_KEY, tokens.access_token);
-    localStorage.setItem(this.REFRESH_KEY, tokens.refresh_token);
+  private saveTokens(t: AuthTokens) {
+    localStorage.setItem(this.ACCESS_KEY, t.access_token);
+    localStorage.setItem(this.REFRESH_KEY, t.refresh_token);
   }
 
   private hasValidToken(): boolean {
     const token = localStorage.getItem(this.ACCESS_KEY);
     if (!token) return false;
     try {
-      // Decode JWT expiry (no library needed)
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 > Date.now();
-    } catch {
-      return false;
-    }
+      const p = JSON.parse(atob(token.split('.')[1]));
+      return p.exp * 1000 > Date.now();
+    } catch { return false; }
   }
 }

@@ -1,6 +1,6 @@
 import {
-  Component, OnInit, OnDestroy,
-  signal, ViewChildren, QueryList, ElementRef, inject,
+  Component, OnInit, OnDestroy, AfterViewInit,
+  signal, computed, ViewChildren, QueryList, ElementRef, inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -15,7 +15,7 @@ type Step = 'phone' | 'otp';
   standalone: true,
   imports: [CommonModule],
 })
-export class LoginPage implements OnInit, OnDestroy {
+export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   private router      = inject(Router);
@@ -23,15 +23,15 @@ export class LoginPage implements OnInit, OnDestroy {
 
   step          = signal<Step>('phone');
   phoneNumber   = signal('');
-  countryCode   = signal('+91');
   isLoading     = signal(false);
   error         = signal<string | null>(null);
-  devOtp        = signal<string | null>(null);
   resendSeconds = signal(0);
+  filledCount   = signal(0);
 
-  // Plain array — NOT a signal — avoids re-render on every keystroke
-  private otpDigits = ['', '', '', '', '', ''];
+  private otpDigits   = ['', '', '', '', '', ''];
   private resendTimer: any = null;
+
+  otpComplete = computed(() => this.filledCount() === 6);
 
   ngOnInit() {
     if (this.authService.isAuthenticated()) {
@@ -39,14 +39,18 @@ export class LoginPage implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+    // Initialize Firebase reCAPTCHA (invisible)
+    this.authService.initRecaptcha('recaptcha-container');
+  }
+
   ngOnDestroy() {
     if (this.resendTimer) clearInterval(this.resendTimer);
   }
 
-  get fullPhone()   { return `${this.countryCode()}${this.phoneNumber()}`; }
-  get phoneValid()  { return this.phoneNumber().length === 10; }
-  get otpValue()    { return this.otpDigits.join(''); }
-  get otpComplete() { return this.otpDigits.every(d => d !== ''); }
+  get fullPhone()  { return `+91${this.phoneNumber()}`; }
+  get phoneValid() { return this.phoneNumber().length === 10; }
+  get otpValue()   { return this.otpDigits.join(''); }
 
   onPhoneInput(event: Event) {
     const raw = (event.target as HTMLInputElement).value.replace(/\D/g, '');
@@ -54,43 +58,36 @@ export class LoginPage implements OnInit, OnDestroy {
     this.error.set(null);
   }
 
+  // ── Send OTP via Firebase ─────────────────
   async sendOtp() {
     if (!this.phoneValid || this.isLoading()) return;
     this.isLoading.set(true);
     this.error.set(null);
-    this.devOtp.set(null);
     try {
-      const res = await this.authService.sendOtp(this.fullPhone);
+      await this.authService.sendOtp(this.fullPhone);
       this.step.set('otp');
       this.startResendTimer();
-      if (res?.dev_otp) this.devOtp.set(res.dev_otp);
       setTimeout(() => this.focusBox(0), 150);
     } catch (err: any) {
-      const isTimeout = err?.name === 'TimeoutError';
-      this.error.set(
-        isTimeout
-          ? 'Request timed out. Please check your connection and try again.'
-          : (err?.error?.detail || 'Failed to send OTP. Try again.')
-      );
+      const msg = this.getFirebaseError(err);
+      this.error.set(msg);
+      // Re-init reCAPTCHA after error
+      setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 500);
     } finally {
       this.isLoading.set(false);
     }
   }
 
+  // ── Verify OTP via Firebase ───────────────
   async verifyOtp() {
-    if (!this.otpComplete || this.isLoading()) return;
+    if (!this.otpComplete() || this.isLoading()) return;
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await this.authService.verifyOtp(this.fullPhone, this.otpValue);
+      await this.authService.verifyOtp(this.otpValue);
       await this.router.navigate(['/home']);
     } catch (err: any) {
-      const isTimeout = err?.name === 'TimeoutError';
-      this.error.set(
-        isTimeout
-          ? 'Request timed out. Please check your connection and try again.'
-          : (err?.error?.detail || 'Invalid OTP. Please try again.')
-      );
+      this.error.set(this.getFirebaseError(err));
       this.clearOtp();
       setTimeout(() => this.focusBox(0), 100);
     } finally {
@@ -98,7 +95,22 @@ export class LoginPage implements OnInit, OnDestroy {
     }
   }
 
-  // Capture keydown BEFORE browser renders — full control, no jumping
+  // ── Firebase error messages ───────────────
+  private getFirebaseError(err: any): string {
+    const code = err?.code || '';
+    const errorMap: Record<string, string> = {
+      'auth/invalid-phone-number':    'Invalid phone number. Use +91XXXXXXXXXX format.',
+      'auth/too-many-requests':       'Too many attempts. Please try again later.',
+      'auth/invalid-verification-code': 'Incorrect OTP. Please try again.',
+      'auth/code-expired':            'OTP expired. Please request a new one.',
+      'auth/quota-exceeded':          'SMS quota exceeded. Try again later.',
+      'auth/captcha-check-failed':    'reCAPTCHA failed. Please refresh and try again.',
+      'auth/network-request-failed':  'Network error. Check your connection.',
+    };
+    return errorMap[code] || err?.message || 'Something went wrong. Please try again.';
+  }
+
+  // ── OTP keydown ──────────────────────────
   onOtpKeydown(event: KeyboardEvent, index: number) {
     if (this.isLoading()) { event.preventDefault(); return; }
     const key = event.key;
@@ -110,36 +122,38 @@ export class LoginPage implements OnInit, OnDestroy {
       if (this.otpDigits[index]) {
         this.otpDigits[index] = '';
         this.setBoxValue(index, '');
+        this.filledCount.set(this.countFilled());
       } else if (index > 0) {
         this.otpDigits[index - 1] = '';
         this.setBoxValue(index - 1, '');
+        this.filledCount.set(this.countFilled());
         this.focusBox(index - 1);
       }
       return;
     }
     if (!/^\d$/.test(key)) { event.preventDefault(); return; }
-
-    // Digit pressed
     event.preventDefault();
     this.otpDigits[index] = key;
     this.setBoxValue(index, key);
+    this.filledCount.set(this.countFilled());
     this.error.set(null);
     if (index < 5) this.focusBox(index + 1);
-    if (this.otpComplete) setTimeout(() => this.verifyOtp(), 150);
+    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
   }
 
   onOtpPaste(event: ClipboardEvent) {
-    event.preventDefault();
     if (this.isLoading()) return;
+    event.preventDefault();
     const pasted = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, 6);
     if (!pasted) return;
     for (let i = 0; i < 6; i++) {
       this.otpDigits[i] = pasted[i] ?? '';
       this.setBoxValue(i, this.otpDigits[i]);
     }
+    this.filledCount.set(this.countFilled());
     const next = this.otpDigits.findIndex(d => d === '');
     this.focusBox(next === -1 ? 5 : next);
-    if (this.otpComplete) setTimeout(() => this.verifyOtp(), 150);
+    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
   }
 
   private focusBox(i: number) {
@@ -152,8 +166,13 @@ export class LoginPage implements OnInit, OnDestroy {
     if (el) el.value = v;
   }
 
+  private countFilled(): number {
+    return this.otpDigits.filter(d => d !== '').length;
+  }
+
   clearOtp() {
     this.otpDigits = ['', '', '', '', '', ''];
+    this.filledCount.set(0);
     setTimeout(() => this.otpInputs?.forEach(el => { el.nativeElement.value = ''; }));
   }
 
@@ -168,17 +187,18 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   resendOtp() {
-    if (this.resendSeconds() > 0) return;
+    if (this.resendSeconds() > 0 || this.isLoading()) return;
     this.clearOtp();
-    this.sendOtp();
+    this.authService.initRecaptcha('recaptcha-container');
+    setTimeout(() => this.sendOtp(), 300);
   }
 
   goBack() {
     this.step.set('phone');
     this.error.set(null);
-    this.devOtp.set(null);
     this.clearOtp();
     if (this.resendTimer) clearInterval(this.resendTimer);
     this.resendSeconds.set(0);
+    setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 300);
   }
 }
