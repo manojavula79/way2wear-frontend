@@ -22,6 +22,12 @@ export const routes: Routes = [
       import('./features/home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'account',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/account/account.page').then((m) => m.AccountPage),
+  },
+  {
     path: 'chat/:sessionId',
     canActivate: [authGuard],
     loadComponent: () =>

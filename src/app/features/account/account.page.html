@@ -1,0 +1,110 @@
+<div class="account-shell">
+
+  <!-- Top bar -->
+  <header class="acc-header">
+    <button class="back-btn" (click)="goBack()" aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h1>Account Settings</h1>
+    <span class="spacer"></span>
+  </header>
+
+  <div class="acc-body">
+
+    <!-- Photo -->
+    <div class="photo-section">
+      <div class="avatar">
+        <img *ngIf="avatarUrl()" [src]="avatarUrl()" alt="Profile photo" />
+        <span *ngIf="!avatarUrl()" class="avatar-initials">{{ initials }}</span>
+      </div>
+      <label class="photo-upload-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Change photo
+        <input type="file" accept="image/*" hidden (change)="onPhotoSelected($event)" />
+      </label>
+    </div>
+
+    <!-- Name -->
+    <div class="field">
+      <label>Name</label>
+      <input type="text" class="text-input" [value]="name()"
+        (input)="name.set($any($event.target).value)"
+        placeholder="Your name" maxlength="40" />
+    </div>
+
+    <!-- Gender -->
+    <div class="field">
+      <label>I shop for</label>
+      <div class="seg-group">
+        <button class="seg" [class.active]="gender() === 'male'"   (click)="setGender('male')">Men</button>
+        <button class="seg" [class.active]="gender() === 'female'" (click)="setGender('female')">Women</button>
+        <button class="seg" [class.active]="gender() === 'unisex'" (click)="setGender('unisex')">Both</button>
+      </div>
+    </div>
+
+    <!-- Height -->
+    <div class="field">
+      <label>Height <span class="hint">(cm)</span></label>
+      <input type="number" class="text-input" inputmode="numeric"
+        [value]="heightCm() ?? ''" (input)="onHeightInput($event)"
+        placeholder="e.g. 170" min="120" max="220" />
+    </div>
+
+    <!-- Skin tone -->
+    <div class="field">
+      <label>Skin tone</label>
+      <div class="chip-group">
+        <button *ngFor="let t of skinToneOptions"
+          class="chip" [class.active]="skinTone() === t"
+          (click)="skinTone.set(t)">{{ t }}</button>
+      </div>
+    </div>
+
+    <!-- Style preference -->
+    <div class="field">
+      <label>Personal style</label>
+      <div class="chip-group">
+        <button *ngFor="let s of styleOptions"
+          class="chip" [class.active]="style() === s"
+          (click)="style.set(s)">{{ s }}</button>
+      </div>
+    </div>
+
+    <!-- Fit type -->
+    <div class="field">
+      <label>Preferred fit</label>
+      <div class="chip-group">
+        <button *ngFor="let f of fitOptions"
+          class="chip" [class.active]="fit() === f"
+          (click)="fit.set(f)">{{ f }}</button>
+      </div>
+    </div>
+
+    <!-- Default budget -->
+    <div class="field">
+      <label>Default budget</label>
+      <div class="chip-group">
+        <button *ngFor="let b of budgetOptions"
+          class="chip" [class.active]="budget() === b"
+          (click)="budget.set(b)">{{ b }}</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Save bar -->
+  <footer class="save-bar">
+    <span class="saved-msg" *ngIf="saved()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Saved
+    </span>
+    <button class="save-btn" (click)="save()">Save changes</button>
+  </footer>
+
+</div>
