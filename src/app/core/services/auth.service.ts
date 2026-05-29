@@ -48,19 +48,35 @@ export class AuthService {
     try {
       if (this.recaptchaVerifier) {
         this.recaptchaVerifier.clear();
+        this.recaptchaVerifier = undefined;
       }
       this.recaptchaVerifier = new RecaptchaVerifier(
         this.firebaseAuth, containerId,
-        { size: 'invisible', callback: () => {} }
+        {
+          size: 'invisible',   // hidden — user never sees it
+          callback: () => {},
+        }
       );
     } catch (err) {
       console.error('reCAPTCHA init error:', err);
     }
   }
 
+  // Ensure reCAPTCHA is ready before sending OTP
+  private async ensureRecaptcha(containerId: string): Promise<void> {
+    if (!this.recaptchaVerifier) {
+      this.initRecaptcha(containerId);
+    }
+    if (this.recaptchaVerifier) {
+      await this.recaptchaVerifier.render();
+    }
+  }
+
   async sendOtp(phone: string): Promise<void> {
     this.isLoading.set(true);
     try {
+      // Make sure reCAPTCHA is initialized + rendered (important for mobile)
+      await this.ensureRecaptcha('recaptcha-container');
       if (!this.recaptchaVerifier) throw new Error('reCAPTCHA not initialized');
       this.confirmationResult = await signInWithPhoneNumber(
         this.firebaseAuth, phone, this.recaptchaVerifier
