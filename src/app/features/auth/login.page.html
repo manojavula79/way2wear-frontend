@@ -67,27 +67,33 @@
         <p>Sent to <strong>{{ fullPhone }}</strong></p>
       </div>
 
-      <!-- OTP boxes -->
+      <!-- OTP boxes — NO readonly so mobile keyboard opens -->
       <div class="otp-row" [class.otp-disabled]="isLoading()" (paste)="onOtpPaste($event)">
         <input #otpInput type="tel" class="otp-box" maxlength="1"
           inputmode="numeric" autocomplete="one-time-code"
-          [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 0)" readonly />
+          [disabled]="isLoading()"
+          (input)="onOtpInput($event, 0)"
+          (keydown)="onOtpKeydown($event, 0)" />
         <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 1)" readonly />
+          inputmode="numeric" [disabled]="isLoading()"
+          (input)="onOtpInput($event, 1)"
+          (keydown)="onOtpKeydown($event, 1)" />
         <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 2)" readonly />
+          inputmode="numeric" [disabled]="isLoading()"
+          (input)="onOtpInput($event, 2)"
+          (keydown)="onOtpKeydown($event, 2)" />
         <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 3)" readonly />
+          inputmode="numeric" [disabled]="isLoading()"
+          (input)="onOtpInput($event, 3)"
+          (keydown)="onOtpKeydown($event, 3)" />
         <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 4)" readonly />
+          inputmode="numeric" [disabled]="isLoading()"
+          (input)="onOtpInput($event, 4)"
+          (keydown)="onOtpKeydown($event, 4)" />
         <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [attr.disabled]="isLoading() ? true : null"
-          (keydown)="onOtpKeydown($event, 5)" readonly />
+          inputmode="numeric" [disabled]="isLoading()"
+          (input)="onOtpInput($event, 5)"
+          (keydown)="onOtpKeydown($event, 5)" />
       </div>
 
       <p class="error-text" *ngIf="error()">
