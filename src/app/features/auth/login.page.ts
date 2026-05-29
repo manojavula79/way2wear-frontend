@@ -40,6 +40,7 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    // Initialize Firebase reCAPTCHA (invisible)
     this.authService.initRecaptcha('recaptcha-container');
   }
 
@@ -57,6 +58,7 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
     this.error.set(null);
   }
 
+  // ── Send OTP via Firebase ─────────────────
   async sendOtp() {
     if (!this.phoneValid || this.isLoading()) return;
     this.isLoading.set(true);
@@ -65,16 +67,18 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
       await this.authService.sendOtp(this.fullPhone);
       this.step.set('otp');
       this.startResendTimer();
-      // Focus first box + open keyboard on mobile
-      setTimeout(() => this.focusBox(0), 300);
+      setTimeout(() => this.focusBox(0), 150);
     } catch (err: any) {
-      this.error.set(this.getFirebaseError(err));
+      const msg = this.getFirebaseError(err);
+      this.error.set(msg);
+      // Re-init reCAPTCHA after error
       setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 500);
     } finally {
       this.isLoading.set(false);
     }
   }
 
+  // ── Verify OTP via Firebase ───────────────
   async verifyOtp() {
     if (!this.otpComplete() || this.isLoading()) return;
     this.isLoading.set(true);
@@ -91,75 +95,35 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // ── Firebase error messages ───────────────
   private getFirebaseError(err: any): string {
     const code = err?.code || '';
-    const map: Record<string, string> = {
-      'auth/invalid-phone-number':      'Invalid phone number. Use +91XXXXXXXXXX format.',
-      'auth/too-many-requests':         'Too many attempts. Please try again later.',
+    const errorMap: Record<string, string> = {
+      'auth/invalid-phone-number':    'Invalid phone number. Use +91XXXXXXXXXX format.',
+      'auth/too-many-requests':       'Too many attempts. Please try again later.',
       'auth/invalid-verification-code': 'Incorrect OTP. Please try again.',
-      'auth/code-expired':              'OTP expired. Please request a new one.',
-      'auth/quota-exceeded':            'SMS quota exceeded. Try again later.',
-      'auth/captcha-check-failed':      'reCAPTCHA failed. Please refresh and try again.',
-      'auth/network-request-failed':    'Network error. Check your connection.',
-      'auth/operation-not-allowed':     'Phone auth not enabled. Contact support.',
+      'auth/code-expired':            'OTP expired. Please request a new one.',
+      'auth/quota-exceeded':          'SMS quota exceeded. Try again later.',
+      'auth/captcha-check-failed':    'reCAPTCHA failed. Please refresh and try again.',
+      'auth/network-request-failed':  'Network error. Check your connection.',
     };
-    return map[code] || err?.message || 'Something went wrong. Please try again.';
+    return errorMap[code] || err?.message || 'Something went wrong. Please try again.';
   }
 
-  // ── OTP INPUT (mobile-friendly) ───────────
-  // Fires on every value change — works on all mobile keyboards
-  onOtpInput(event: Event, index: number) {
-    if (this.isLoading()) return;
-    const input = event.target as HTMLInputElement;
-    const raw   = input.value.replace(/\D/g, '');
-
-    // Empty = deletion handled by keydown, just sync
-    if (!raw) {
-      this.otpDigits[index] = '';
-      this.filledCount.set(this.countFilled());
-      return;
-    }
-
-    // Multiple digits = SMS autofill or paste → distribute across boxes
-    if (raw.length > 1) {
-      for (let i = 0; i < raw.length && (index + i) < 6; i++) {
-        this.otpDigits[index + i] = raw[i];
-        this.setBoxValue(index + i, raw[i]);
-      }
-      this.filledCount.set(this.countFilled());
-      const next = this.otpDigits.findIndex(d => d === '');
-      this.focusBox(next === -1 ? 5 : next);
-      if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
-      return;
-    }
-
-    // Single digit typed
-    const digit = raw.slice(-1);
-    this.otpDigits[index] = digit;
-    input.value = digit;              // force single character display
-    this.filledCount.set(this.countFilled());
-    this.error.set(null);
-
-    // Move to next box (opens keyboard there on mobile)
-    if (index < 5) this.focusBox(index + 1);
-
-    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
-  }
-
-  // ── Keydown — handles Backspace + arrows ──
+  // ── OTP keydown ──────────────────────────
   onOtpKeydown(event: KeyboardEvent, index: number) {
     if (this.isLoading()) { event.preventDefault(); return; }
     const key = event.key;
-
+    if (key === 'Tab') return;
+    if (key === 'ArrowLeft')  { event.preventDefault(); this.focusBox(index - 1); return; }
+    if (key === 'ArrowRight') { event.preventDefault(); this.focusBox(index + 1); return; }
     if (key === 'Backspace') {
+      event.preventDefault();
       if (this.otpDigits[index]) {
-        // Clear current box
         this.otpDigits[index] = '';
         this.setBoxValue(index, '');
         this.filledCount.set(this.countFilled());
       } else if (index > 0) {
-        // Already empty → go back and clear previous
-        event.preventDefault();
         this.otpDigits[index - 1] = '';
         this.setBoxValue(index - 1, '');
         this.filledCount.set(this.countFilled());
@@ -167,9 +131,14 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
       }
       return;
     }
-
-    if (key === 'ArrowLeft')  { event.preventDefault(); this.focusBox(index - 1); }
-    if (key === 'ArrowRight') { event.preventDefault(); this.focusBox(index + 1); }
+    if (!/^\d$/.test(key)) { event.preventDefault(); return; }
+    event.preventDefault();
+    this.otpDigits[index] = key;
+    this.setBoxValue(index, key);
+    this.filledCount.set(this.countFilled());
+    this.error.set(null);
+    if (index < 5) this.focusBox(index + 1);
+    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
   }
 
   onOtpPaste(event: ClipboardEvent) {
@@ -189,12 +158,7 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
 
   private focusBox(i: number) {
     if (i < 0 || i > 5) return;
-    const el = this.otpInputs.get(i)?.nativeElement;
-    if (el) {
-      el.focus();
-      // Force keyboard on mobile by clicking
-      el.click();
-    }
+    this.otpInputs.get(i)?.nativeElement.focus();
   }
 
   private setBoxValue(i: number, v: string) {
