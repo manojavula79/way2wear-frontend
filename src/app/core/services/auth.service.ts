@@ -47,7 +47,7 @@ export class AuthService {
   initRecaptcha(containerId: string) {
     try {
       if (this.recaptchaVerifier) {
-        this.recaptchaVerifier.clear();
+        return;
       }
       this.recaptchaVerifier = new RecaptchaVerifier(
         this.firebaseAuth, containerId,
@@ -66,8 +66,8 @@ export class AuthService {
         this.firebaseAuth, phone, this.recaptchaVerifier
       );
     } catch (err: any) {
-      this.recaptchaVerifier?.clear();
-      this.recaptchaVerifier = undefined;
+      // this.recaptchaVerifier?.clear();
+      // this.recaptchaVerifier = undefined;
       throw err;
     } finally {
       this.isLoading.set(false);

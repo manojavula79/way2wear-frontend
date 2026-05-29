@@ -69,7 +69,7 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.focusBox(0), 300);
     } catch (err: any) {
       this.error.set(this.getFirebaseError(err));
-      setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 500);
+      // setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 500);
     } finally {
       this.isLoading.set(false);
     }
@@ -225,7 +225,7 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
   resendOtp() {
     if (this.resendSeconds() > 0 || this.isLoading()) return;
     this.clearOtp();
-    this.authService.initRecaptcha('recaptcha-container');
+    // this.authService.initRecaptcha('recaptcha-container');
     setTimeout(() => this.sendOtp(), 300);
   }
 
