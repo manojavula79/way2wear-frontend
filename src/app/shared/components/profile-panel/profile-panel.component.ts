@@ -1,6 +1,7 @@
 import {
   Component, Output, EventEmitter, inject,
   signal, ViewChild, ElementRef,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -9,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { FeedbackService } from '../../../core/services/feedback.service';
 import { VoiceService } from '../../../core/services/voice.service';
 import { environment } from '../../../../environments/environment';
+import { SavedService } from '@core/services/saved.service';
 
 @Component({
   selector: 'app-profile-panel',
@@ -17,7 +19,7 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule],
 })
-export class ProfilePanelComponent {
+export class ProfilePanelComponent implements OnInit{
   @Output() closed = new EventEmitter<void>();
   @ViewChild('feedbackBox') feedbackBox!: ElementRef<HTMLTextAreaElement>;
 
@@ -28,6 +30,7 @@ export class ProfilePanelComponent {
   voice                   = inject(VoiceService);
 
   profile = this.userService.profile;
+  saved = inject(SavedService);
 
   // Feedback state
   rating        = signal(0);
@@ -110,6 +113,12 @@ export class ProfilePanelComponent {
     this.closed.emit();
     this.router.navigate(['/account']);
   }
+  ngOnInit() {
+    this.saved.refreshAll();
+  }
+
+  goToSaved() { this.closed.emit(); this.router.navigate(['/saved']); }
+  goToLiked() { this.closed.emit(); this.router.navigate(['/liked']); }
 
   openLinkedIn() {
     window.open(this.linkedinUrl, '_blank', 'noopener,noreferrer');

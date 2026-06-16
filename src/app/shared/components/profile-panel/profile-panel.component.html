@@ -16,20 +16,27 @@
 
     <!-- Stats: Saved looks + Likes -->
     <div class="stats-row">
-      <div class="stat-card">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M5 3h14a1 1 0 011 1v16l-8-4-8 4V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-        </svg>
-        <span class="stat-num">{{ profile().savedOutfits.length }}</span>
-        <span class="stat-label">Saved looks</span>
-      </div>
-      <div class="stat-card">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M12 20s-7-4.5-7-10a4 4 0 017-2 4 4 0 017 2c0 5.5-7 10-7 10z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-        </svg>
-        <span class="stat-num">{{ profile().totalLikes }}</span>
-        <span class="stat-label">Likes</span>
-      </div>
+      <button class="stat-card" (click)="goToSaved()">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"
+              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-val">{{ saved.savedCount() }}</div>
+        <div class="stat-lbl">SAVED LOOKS</div>
+      </button>
+
+      <button class="stat-card" (click)="goToLiked()">
+        <div class="stat-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 20s-7-4.5-7-10a4 4 0 017-2 4 4 0 017 2c0 5.5-7 10-7 10z"
+              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="stat-val">{{ saved.likedCount() }}</div>
+        <div class="stat-lbl">LIKES</div>
+      </button>
     </div>
 
     <!-- Style snapshot -->

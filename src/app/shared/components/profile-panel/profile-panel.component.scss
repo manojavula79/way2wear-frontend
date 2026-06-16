@@ -192,3 +192,10 @@
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.stat-card {
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: transform .15s, border-color .15s;
+}
+.stat-card:active { transform: scale(0.97); }

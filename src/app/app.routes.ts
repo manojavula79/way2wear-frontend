@@ -34,6 +34,18 @@ export const routes: Routes = [
       import('./features/home/home.page').then((m) => m.HomePage),
   },
   {
+    path: 'saved',
+    loadComponent: () =>
+      import('./features/collection/collection.page').then(m => m.CollectionPage),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'liked',
+    loadComponent: () =>
+      import('./features/collection/collection.page').then(m => m.CollectionPage),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },
