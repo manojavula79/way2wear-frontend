@@ -13,6 +13,8 @@ import { ProfilePanelComponent }    from '../../shared/components/profile-panel/
 import { MessageBubbleComponent }   from '../../shared/components/message-bubble/message-bubble.component';
 import { TypingIndicatorComponent } from '../../shared/components/typing-indicator/typing-indicator.component';
 import { MessageInputComponent }    from '../../shared/components/message-input/message-input.component';
+import { Outfit } from '../../core/models/message.model';
+import { OutfitDetailComponent } from '@shared/components/outfit-detail/outfit-detail.component';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +25,7 @@ import { MessageInputComponent }    from '../../shared/components/message-input/
     CommonModule,
     SideMenuComponent, ProfilePanelComponent,
     MessageBubbleComponent, TypingIndicatorComponent, MessageInputComponent,
+    OutfitDetailComponent
   ],
 })
 export class HomePage implements OnInit, AfterViewChecked {
@@ -33,6 +36,7 @@ export class HomePage implements OnInit, AfterViewChecked {
 
   sideMenuOpen = signal(false);
   profileOpen  = signal(false);
+  selectedOutfit = signal<Outfit | null>(null);
   isLoading    = this.chatService.isLoading;
 
   currentSession = this.sessionService.currentSession;

@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OutfitItem } from '../../../core/models/message.model';
+import { Outfit } from '../../../core/models/message.model';
 
 @Component({
   selector: 'app-outfit-card',
@@ -10,13 +10,14 @@ import { OutfitItem } from '../../../core/models/message.model';
   imports: [CommonModule],
 })
 export class OutfitCardComponent {
-  @Input({ required: true }) outfit!: OutfitItem;
+  @Input({ required: true }) outfit!: Outfit;
   @Input() index: number = 0;
+  @Output() viewDetails = new EventEmitter<Outfit>();
 
   imgErrors: Record<string, boolean> = {};
 
-  getSwatchBg(color: string): string {
-    return this.hexToRgba(color, 0.15);
+  getSwatchBg(color: string | undefined): string {
+    return this.hexToRgba(color || '#888888', 0.15);
   }
 
   onImgError(key: string) {
@@ -25,11 +26,6 @@ export class OutfitCardComponent {
 
   hasImgError(key: string): boolean {
     return !!this.imgErrors[key];
-  }
-
-  openLink(url: string) {
-    if (!url || url === '#' || url.startsWith('#product')) return;
-    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   private hexToRgba(hex: string, alpha: number): string {

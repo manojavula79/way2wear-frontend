@@ -6,26 +6,33 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export interface Message {
   id: string;
-  role: MessageRole;
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  isStreaming?: boolean;
   error?: boolean;
 }
 
 export interface OutfitResponse {
   message: string;
-  tip?: string;
-  outfits: OutfitItem[];
+  tip?: string | null;
+  outfits: Outfit[];
 }
-
 export interface OutfitItem {
+  title: string;
+  brand?: string;
+  price?: number;
+  currency?: string;
+  color?: string;
+  image?: string;
+  url?: string;
+}
+export interface Outfit {
   id: string;
   name: string;
-  top: ProductItem;
-  bottom: ProductItem;
-  accessory?: ProductItem;
-  note: string;
+  note?: string;
+  shoe_note?: string;
+  top: OutfitItem;
+  bottom: OutfitItem;
 }
 
 export interface ProductItem {

@@ -1,6 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Message, OutfitResponse } from '../../../core/models/message.model';
+import { Message, OutfitResponse, Outfit } from '../../../core/models/message.model';
 import { OutfitCardComponent } from '../outfit-card/outfit-card.component';
 import { ChatService } from '../../../core/services/chat.service';
 
@@ -13,6 +13,7 @@ import { ChatService } from '../../../core/services/chat.service';
 })
 export class MessageBubbleComponent implements OnInit {
   @Input({ required: true }) message!: Message;
+  @Output() viewDetails = new EventEmitter<Outfit>();
 
   parsedResponse: OutfitResponse | null = null;
   isUser = false;

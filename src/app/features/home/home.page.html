@@ -1,17 +1,11 @@
 <div class="page-shell">
 
-  <!-- ══════════════════════════════════
-       OVERLAY (closes drawers)
-  ══════════════════════════════════ -->
   <div
     class="overlay"
     [class.visible]="sideMenuOpen() || profileOpen()"
     (click)="closeSideMenu(); closeProfile()"
   ></div>
 
-  <!-- ══════════════════════════════════
-       SIDE MENU DRAWER (Left)
-  ══════════════════════════════════ -->
   <div class="drawer drawer-left" [class.open]="sideMenuOpen()">
     <app-side-menu
       (closed)="closeSideMenu()"
@@ -20,21 +14,13 @@
     ></app-side-menu>
   </div>
 
-  <!-- ══════════════════════════════════
-       PROFILE DRAWER (Right)
-  ══════════════════════════════════ -->
   <div class="drawer drawer-right" [class.open]="profileOpen()">
     <app-profile-panel (closed)="closeProfile()"></app-profile-panel>
   </div>
 
-  <!-- ══════════════════════════════════
-       MAIN APP SHELL
-  ══════════════════════════════════ -->
   <div class="app-shell">
 
-    <!-- TOP NAVBAR -->
     <header class="navbar">
-      <!-- Hamburger -->
       <button class="nav-btn" (click)="toggleSideMenu()" aria-label="Open menu">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M2.5 5.5h15M2.5 10h15M2.5 14.5h15"
@@ -42,10 +28,8 @@
         </svg>
       </button>
 
-      <!-- Title -->
       <span class="navbar-title">Way2Wear</span>
 
-      <!-- Profile icon -->
       <button class="profile-btn" (click)="toggleProfile()" aria-label="Open profile">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <circle cx="9" cy="6.5" r="3" stroke="currentColor" stroke-width="1.5"/>
@@ -55,19 +39,14 @@
       </button>
     </header>
 
-    <!-- MAIN CONTENT AREA -->
     <main class="main-content" #mainContent>
 
-      <!-- ─────────────────────────────
-           HERO / EMPTY STATE
-      ───────────────────────────────── -->
       <div class="hero-section" *ngIf="!hasMessages()">
         <div class="hero-inner">
           <h1 class="hero-title">From idea to outfit<br/>in seconds</h1>
           <p class="hero-sub1">Tell us where. We style you. 🔥</p>
           <p class="hero-sub2">Stop scrolling. Start wearing.</p>
 
-          <!-- Suggestion chips -->
           <div class="suggestion-chips">
             <button
               class="chip"
@@ -78,25 +57,20 @@
         </div>
       </div>
 
-      <!-- ─────────────────────────────
-           CHAT MESSAGES
-      ───────────────────────────────── -->
       <div class="messages-list" *ngIf="hasMessages()">
         <app-message-bubble
           *ngFor="let message of messages(); trackBy: trackById"
           [message]="message"
+          (viewDetails)="selectedOutfit.set($event)"
         ></app-message-bubble>
 
-        <!-- Typing indicator -->
         <app-typing-indicator *ngIf="isLoading()"></app-typing-indicator>
 
-        <!-- Scroll anchor -->
         <div #messagesEnd class="scroll-anchor"></div>
       </div>
 
     </main>
 
-    <!-- BOTTOM INPUT BAR -->
     <footer class="input-footer">
       <app-message-input
         (messageSent)="onMessageSent($event)"
@@ -104,4 +78,11 @@
     </footer>
 
   </div>
+
+  <!-- Outfit detail modal -->
+  <app-outfit-detail
+    *ngIf="selectedOutfit() as o"
+    [outfit]="o"
+    (close)="selectedOutfit.set(null)">
+  </app-outfit-detail>
 </div>
