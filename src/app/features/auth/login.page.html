@@ -33,7 +33,6 @@
           autocomplete="tel-national"
         />
       </div>
-
       <p class="error-text" *ngIf="error()">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
@@ -121,6 +120,11 @@
       </div>
 
     </div>
+  </div>
+  <div class="login-links">
+    <button type="button" class="link-btn" (click)="goHelp()">Help</button>
+    <span class="dot-sep">·</span>
+    <button type="button" class="link-btn" (click)="goTerms()">Terms & Conditions</button>
   </div>
 
   <p class="login-footer">Way2Wear · AI Fashion Stylist</p>

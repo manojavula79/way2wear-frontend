@@ -38,6 +38,7 @@ export class ChatService {
       const p = this.userService.profile();
       const profile = {
         gender: p.gender,
+        age:    p.age,
         stylePreference: p.stylePreference,
         fitType: p.fitType,
         skinTone: p.skinTone,

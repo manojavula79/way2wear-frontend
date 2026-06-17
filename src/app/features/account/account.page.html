@@ -40,11 +40,15 @@
     <div class="field">
       <label>I shop for</label>
       <div class="seg-group">
-        <button class="seg" [class.active]="gender() === 'male'"   (click)="setGender('male')">Men</button>
-        <button class="seg" [class.active]="gender() === 'female'" (click)="setGender('female')">Women</button>
-        <button class="seg" [class.active]="gender() === 'unisex'" (click)="setGender('unisex')">Both</button>
+        <button class="seg" [class.active]="gender() === 'male'"   (click)="setGender('male')">Male</button>
+        <button class="seg" [class.active]="gender() === 'female'" (click)="setGender('female')">Female</button>
+        <!-- <button class="seg" [class.active]="gender() === 'unisex'" (click)="setGender('unisex')">Both</button> -->
       </div>
     </div>
+    <label class="field-label">Age</label>
+    <input type="number" min="1" max="120" inputmode="numeric"
+      class="text-input" placeholder="e.g. 28"
+      [value]="age() ?? ''" (input)="onAge($event)" />
 
     <!-- Height -->
     <div class="field">

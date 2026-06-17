@@ -38,8 +38,7 @@ export class AccountPage {
   avatarUrl   = signal<string | undefined>(this.profile().avatarUrl);
 
   saved = signal(false);
-
-  // ── Photo upload (local preview as base64) ──
+  age = signal<number | null>(this.profile().age ?? null);
   onPhotoSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
@@ -58,6 +57,10 @@ export class AccountPage {
     const v = (event.target as HTMLInputElement).value;
     this.heightCm.set(v ? +v : null);
   }
+  onAge(e: Event) {
+    const v = (e.target as HTMLInputElement).value;
+    this.age.set(v ? Math.max(1, Math.min(120, +v)) : null);
+  }
 
   // ── Save ──────────────────────────────────
   save() {
@@ -65,6 +68,7 @@ export class AccountPage {
       name:            this.name().trim() || 'Fashion Enthusiast',
       gender:          this.gender(),
       heightCm:        this.heightCm() ?? undefined,
+      age:             this.age() ?? undefined,
       skinTone:        this.skinTone(),
       stylePreference: this.style(),
       fitType:         this.fit(),

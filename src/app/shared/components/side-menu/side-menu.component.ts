@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, inject, computed } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { SessionService } from '../../../core/services/session.service';
 import { ChatSession } from '../../../core/models/message.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-side-menu',
@@ -14,6 +15,8 @@ export class SideMenuComponent {
   @Output() closed = new EventEmitter<void>();
   @Output() sessionSelected = new EventEmitter<string>();
   @Output() newSession = new EventEmitter<void>();
+
+  private router = inject(Router);
 
   private sessionService = inject(SessionService);
 
@@ -38,4 +41,6 @@ export class SideMenuComponent {
   close() {
     this.closed.emit();
   }
+  goHelp()  { this.closed.emit(); this.router.navigate(['/help']); }
+  goTerms() { this.closed.emit(); this.router.navigate(['/terms']); }
 }

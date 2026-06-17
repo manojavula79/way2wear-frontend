@@ -23,11 +23,11 @@ export type BudgetRange =
 
 export interface UserProfile {
   id: string;
+  age?: number;
   name: string;
   email: string;
   phone?: string;
   avatarUrl?: string;
-
   // Style preferences
   stylePreference: StylePreference;
   fitType: FitType;
@@ -50,6 +50,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   id: 'guest-001',
   name: 'Fashion Enthusiast',
   email: '',
+  age:undefined,
   stylePreference: 'Minimalist / Modern',
   fitType: 'Regular',
   budgetRange: '₹2000 - ₹5000',

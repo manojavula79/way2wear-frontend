@@ -237,4 +237,6 @@ export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
     this.resendSeconds.set(0);
     setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 300);
   }
+  goHelp()  { this.router.navigate(['/help']); }
+  goTerms() { this.router.navigate(['/terms']); }
 }
