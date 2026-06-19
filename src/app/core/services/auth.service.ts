@@ -25,7 +25,7 @@ export class AuthService {
 
   private firebaseApp!: FirebaseApp;
   private firebaseAuth!: Auth;
-  private recaptchaVerifier?: RecaptchaVerifier;
+  private recaptchaVerifier: RecaptchaVerifier | null = null;
   private confirmationResult?: ConfirmationResult;
 
   private readonly ACCESS_KEY  = 'w2w_access_token';
@@ -58,21 +58,24 @@ export class AuthService {
     }
   }
 
-  async sendOtp(phone: string): Promise<void> {
-    this.isLoading.set(true);
-    try {
-      if (!this.recaptchaVerifier) throw new Error('reCAPTCHA not initialized');
-      this.confirmationResult = await signInWithPhoneNumber(
-        this.firebaseAuth, phone, this.recaptchaVerifier
-      );
-    } catch (err: any) {
-      // this.recaptchaVerifier?.clear();
-      // this.recaptchaVerifier = undefined;
+async sendOtp(phoneNumber: string) {
+  try {
+    const verifier = await this.ensureRecaptcha();
+    this.confirmationResult = await signInWithPhoneNumber(this.firebaseAuth, phoneNumber, verifier);
+  } catch (err: any) {
+    const msg = String(err?.message || err);
+    // The "client element has been removed" / stale-widget case → rebuild once and retry
+    if (msg.includes('client element has been removed') ||
+        msg.includes('reCAPTCHA has already been rendered') ||
+        err?.code === 'auth/internal-error') {
+      this.clearRecaptcha();
+      const verifier = await this.ensureRecaptcha();
+      this.confirmationResult = await signInWithPhoneNumber(this.firebaseAuth, phoneNumber, verifier);
+    } else {
       throw err;
-    } finally {
-      this.isLoading.set(false);
     }
   }
+}
 
   async verifyOtp(otp: string): Promise<void> {
     if (!this.confirmationResult) throw new Error('Please request an OTP first');
@@ -136,5 +139,30 @@ export class AuthService {
       const p = JSON.parse(atob(token.split('.')[1]));
       return p.exp * 1000 > Date.now();
     } catch { return false; }
+  }
+
+  private async ensureRecaptcha(): Promise<RecaptchaVerifier> {
+    // If we already have one, try to reuse — but verify its element still exists
+    const el = document.getElementById('recaptcha-container');
+    if (this.recaptchaVerifier && el && el.childElementCount > 0) {
+      return this.recaptchaVerifier;
+    }
+
+    // Stale or missing → tear down and rebuild
+    this.clearRecaptcha();
+
+    this.recaptchaVerifier = new RecaptchaVerifier(this.firebaseAuth, 'recaptcha-container', {
+      size: 'invisible',
+    });
+    await this.recaptchaVerifier.render();
+    return this.recaptchaVerifier;
+  }
+
+  private clearRecaptcha() {
+    try { this.recaptchaVerifier?.clear(); } catch {}
+    this.recaptchaVerifier = null;
+    // also empty the container DOM so a fresh widget can mount
+    const el = document.getElementById('recaptcha-container');
+    if (el) el.innerHTML = '';
   }
 }

@@ -1,6 +1,12 @@
 <!-- USER MESSAGE -->
-<div class="user-row" *ngIf="isUser">
+<!-- <div class="user-row" *ngIf="isUser">
   <div class="user-bubble">{{ message.content }}</div>
+</div> -->
+<div class="user-row" *ngIf="isUser">
+  <div class="user-stack">
+    <img *ngIf="message.image" [src]="message.image" class="user-img" alt="attachment" />
+    <div class="user-bubble" *ngIf="message.content">{{ message.content }}</div>
+  </div>
 </div>
 
 <!-- AI MESSAGE -->

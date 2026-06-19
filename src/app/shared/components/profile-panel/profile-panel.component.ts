@@ -73,9 +73,9 @@ export class ProfilePanelComponent implements OnInit{
       const el = this.feedbackBox?.nativeElement;
       if (el) { el.value = next; this.autoGrow(el); }
     });
-    if (!started) {
-      this.feedbackError.set('Voice input is not supported on this device. Please type instead.');
-    }
+    // if (!started) {
+    //   this.feedbackError.set('Voice input is not supported on this device. Please type instead.');
+    // }
   }
 
   // ── Submit feedback ───────────────────────

@@ -12,7 +12,7 @@ import { SideMenuComponent }        from '../../shared/components/side-menu/side
 import { ProfilePanelComponent }    from '../../shared/components/profile-panel/profile-panel.component';
 import { MessageBubbleComponent }   from '../../shared/components/message-bubble/message-bubble.component';
 import { TypingIndicatorComponent } from '../../shared/components/typing-indicator/typing-indicator.component';
-import { MessageInputComponent }    from '../../shared/components/message-input/message-input.component';
+import { MessageInputComponent,OutgoingMessage }    from '../../shared/components/message-input/message-input.component';
 import { Outfit } from '../../core/models/message.model';
 import { OutfitDetailComponent } from '@shared/components/outfit-detail/outfit-detail.component';
 
@@ -94,8 +94,12 @@ export class HomePage implements OnInit, AfterViewChecked {
   // ══════════════════════════════════════
   // SEND MESSAGE
   // ══════════════════════════════════════
-  async onMessageSent(text: string) {
+  async onMessageSent(payload: OutgoingMessage | string) {
     // ── Step 1: Ensure session exists FIRST ──
+    const text  = typeof payload === 'string' ? payload : payload.text;
+    const image = typeof payload === 'string' ? undefined : payload.image;
+
+    if (!text?.trim() && !image) return;
     if (!this.sessionService.currentSessionId()) {
       this.sessionService.createSession();
     }
@@ -106,6 +110,7 @@ export class HomePage implements OnInit, AfterViewChecked {
       id:        this.chatService.generateId(),
       role:      'user',
       content:   text,
+      image,
       timestamp: new Date(),
     };
     this.sessionService.addMessage(sessionId, userMsg);

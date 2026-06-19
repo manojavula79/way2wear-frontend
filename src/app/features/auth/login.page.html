@@ -46,7 +46,11 @@
         <span *ngIf="!isLoading()">Send OTP</span>
         <span class="spinner" *ngIf="isLoading()"></span>
       </button>
-
+      <div class="login-links">
+        <button type="button" class="link-btn" (click)="goHelp()">Help</button>
+        <span class="dot-sep">·</span>
+        <button type="button" class="link-btn" (click)="goTerms()">Terms & Conditions</button>
+      </div>
       <p class="terms-note">By continuing, you agree to our Terms of Service</p>
     </div>
 
@@ -118,13 +122,7 @@
           Resend OTP
         </button>
       </div>
-
     </div>
-  </div>
-  <div class="login-links">
-    <button type="button" class="link-btn" (click)="goHelp()">Help</button>
-    <span class="dot-sep">·</span>
-    <button type="button" class="link-btn" (click)="goTerms()">Terms & Conditions</button>
   </div>
 
   <p class="login-footer">Way2Wear · AI Fashion Stylist</p>

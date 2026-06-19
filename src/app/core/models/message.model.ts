@@ -10,6 +10,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   error?: boolean;
+  image?: string
 }
 
 export interface OutfitResponse {
