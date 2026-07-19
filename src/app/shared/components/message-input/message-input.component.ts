@@ -27,11 +27,11 @@ export interface OutgoingMessage {
       </div>
 
       <!-- Recording banner -->
-      <div class="rec-banner" *ngIf="voice.isListening()">
+      <!-- <div class="rec-banner" *ngIf="voice.isListening()">
         <span class="rec-dot"></span>
         <span class="rec-text">{{ voice.interim() || 'Listening…' }}</span>
         <button class="rec-stop" (click)="toggleVoice()">Stop</button>
-      </div>
+      </div> -->
 
       <div class="input-bar">
         <!-- + add image -->
@@ -49,7 +49,7 @@ export interface OutgoingMessage {
           (keydown)="onKeydown($event)"></textarea>
 
         <!-- mic -->
-        <button class="icon-btn mic" style="display:none !important;" [class.listening]="voice.isListening()"
+        <button class="icon-btn mic" [class.listening]="voice.isListening()"
           *ngIf="voice.supported()"
           (click)="toggleVoice()" aria-label="Voice">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

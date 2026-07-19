@@ -4,7 +4,7 @@ export const environment = {
   openaiModel: 'gpt-4o',
   appVersion: '1.0.0',
   amazonAffiliateTag: 'way2wear-20',
-  linkedinUrl: 'https://www.linkedin.com/in/YOUR_LINKEDIN_USERNAME',
+  linkedinUrl: 'https://www.linkedin.com/in/manoj-a-57095216b',
   firebase: {
     apiKey: "AIzaSyDXDff1gqlj5uO__8SUMi5erGd4o4P2ObI",
     authDomain: "way2wear-814ca.firebaseapp.com",

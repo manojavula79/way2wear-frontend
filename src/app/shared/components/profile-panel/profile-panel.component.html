@@ -46,7 +46,37 @@
       <span class="snap-val">{{ profile().stylePreference }}</span>
     </div>
 
-    <!-- ── FEEDBACK ── -->
+    <!-- Account Settings + Contact -->
+    <div class="menu-list">
+      <button class="menu-item" (click)="openAccountSettings()">
+        <svg class="mi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span class="mi-body">
+          <span class="mi-title">Account Settings</span>
+          <span class="mi-sub">Height, skin tone, photo, fit, budget</span>
+        </span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button class="menu-item" (click)="openLinkedIn()">
+        <svg class="mi-icon linkedin" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4.98 3.5a2.5 2.5 0 11-.01 5.01A2.5 2.5 0 014.98 3.5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.84-2.05 3.78-2.05 4.04 0 4.79 2.66 4.79 6.12V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85V21h-4V9z"/>
+        </svg>
+        <span class="mi-body">
+          <span class="mi-title">Contact us</span>
+          <span class="mi-sub">Connect with us on LinkedIn</span>
+        </span>
+        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 11L11 5M11 5H6M11 5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+        <!-- ── FEEDBACK ── -->
     <div class="feedback-box">
       <div class="fb-head">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -105,37 +135,7 @@
       </ng-container>
     </div>
 
-    <!-- Account Settings + Contact -->
-    <div class="menu-list">
-      <button class="menu-item" (click)="openAccountSettings()">
-        <svg class="mi-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <span class="mi-body">
-          <span class="mi-title">Account Settings</span>
-          <span class="mi-sub">Height, skin tone, photo, fit, budget</span>
-        </span>
-        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-
-      <button class="menu-item" (click)="openLinkedIn()" style="display: none !important;">
-        <svg class="mi-icon linkedin" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M4.98 3.5a2.5 2.5 0 11-.01 5.01A2.5 2.5 0 014.98 3.5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05c.53-1 1.84-2.05 3.78-2.05 4.04 0 4.79 2.66 4.79 6.12V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85V21h-4V9z"/>
-        </svg>
-        <span class="mi-body">
-          <span class="mi-title">Contact us</span>
-          <span class="mi-sub">Connect with us on LinkedIn</span>
-        </span>
-        <svg class="mi-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M5 11L11 5M11 5H6M11 5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Logout -->
+        <!-- Logout -->
     <button class="logout-btn" (click)="logout()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
