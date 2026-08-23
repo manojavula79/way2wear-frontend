@@ -1,15 +1,10 @@
-<!-- USER MESSAGE -->
-<!-- <div class="user-row" *ngIf="isUser">
-  <div class="user-bubble">{{ message.content }}</div>
-</div> -->
+<!-- REPLACE shared/components/message-bubble/message-bubble.component.html with this -->
+<!-- Shows first 3 outfits, then Load More adds 3 at a time up to 12 -->
+
 <div class="user-row" *ngIf="isUser">
-  <div class="user-stack">
-    <img *ngIf="message.image" [src]="message.image" class="user-img" alt="attachment" />
-    <div class="user-bubble" *ngIf="message.content">{{ message.content }}</div>
-  </div>
+  <div class="user-bubble">{{ message.content }}</div>
 </div>
 
-<!-- AI MESSAGE -->
 <div class="ai-row" *ngIf="!isUser">
   <div class="ai-avatar">W</div>
 
@@ -32,13 +27,24 @@
         <p>{{ parsedResponse.tip }}</p>
       </div>
 
-      <!-- Outfit cards -->
+      <!-- Outfit cards — INITIALLY SHOW 3 -->
       <app-outfit-card
-        *ngFor="let outfit of parsedResponse.outfits; let i = index"
+        *ngFor="let outfit of displayedOutfits(); let i = index"
         [outfit]="outfit"
         [index]="i"
-        (viewDetails)="viewDetails.emit($event)"
-      ></app-outfit-card>
+        (viewDetails)="viewDetails.emit($event)">
+      </app-outfit-card>
+
+      <!-- Load More button — appears after 3 outfits, up to 12 total -->
+      <div class="load-more-wrap" *ngIf="hasMore()">
+        <button class="load-more-btn" (click)="loadMore()">
+          <span>Load {{ Math.min(visibleCount() + 3, 12) - visibleCount() }} more outfits</span>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+            <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <p class="outfit-count">Showing {{ visibleCount() }} of {{ Math.min(parsedResponse.outfits.length, 12) }} outfits</p>
+      </div>
 
       <!-- Empty outfits fallback -->
       <div class="empty-outfits" *ngIf="parsedResponse.outfits.length === 0 && parsedResponse.message">
