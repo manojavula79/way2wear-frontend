@@ -1,0 +1,86 @@
+<div class="profile-form-card">
+
+  <!-- Message from bot -->
+  <p class="form-message">{{ message }}</p>
+
+  <!-- GENDER FIELD (Required) -->
+  <div class="form-field" *ngIf="formFields['gender']">
+    <label class="field-label">
+      Gender <span class="required">*</span>
+    </label>
+    <div class="button-group">
+      <button
+        *ngFor="let option of getOptions('gender')"
+        class="option-button"
+        [class.selected]="selectedGender === option.toLowerCase()"
+        (click)="selectGender(option)"
+        [disabled]="isSubmitting"
+      >
+        {{ option }}
+      </button>
+    </div>
+  </div>
+
+  <!-- SKIN TONE FIELD (Optional) -->
+  <div class="form-field" *ngIf="formFields['skin_tone']">
+    <label class="field-label">
+      Skin Tone
+      <span class="optional">(Optional)</span>
+    </label>
+    <div class="button-group">
+      <button
+        *ngFor="let option of getOptions('skin_tone')"
+        class="option-button tone-button"
+        [class.selected]="selectedSkinTone === option.toLowerCase()"
+        [style.background]="getToneColor(option)"
+        (click)="selectSkinTone(option)"
+        [disabled]="isSubmitting"
+      >
+        {{ option }}
+      </button>
+    </div>
+  </div>
+
+  <!-- SIZE FIELD (Optional) -->
+  <div class="form-field" *ngIf="formFields['size']">
+    <label class="field-label">
+      Size
+      <span class="optional">(Optional)</span>
+    </label>
+    <select
+      class="size-dropdown"
+      [value]="selectedSize"
+      (change)="selectedSize = $any($event.target).value"
+      [disabled]="isSubmitting"
+    >
+      <option value="">Select size...</option>
+      <option
+        *ngFor="let option of getOptions('size')"
+        [value]="option.toLowerCase()"
+      >
+        {{ option }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="form-actions">
+    <button
+      class="btn btn-primary"
+      (click)="submitForm()"
+      [disabled]="isSubmitting"
+    >
+      <span *ngIf="!isSubmitting">Continue</span>
+      <span *ngIf="isSubmitting">Loading...</span>
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      (click)="skipForm()"
+      [disabled]="isSubmitting"
+    >
+      Skip for now
+    </button>
+  </div>
+
+</div>

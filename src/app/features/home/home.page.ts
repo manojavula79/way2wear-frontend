@@ -52,6 +52,7 @@ export class HomePage implements OnInit, AfterViewChecked {
   ];
 
   private shouldScroll = false;
+  sessionProfile: any = null;
 
   ngOnInit() {
     this.loadSessionsFromBackend();
@@ -94,10 +95,11 @@ export class HomePage implements OnInit, AfterViewChecked {
   // ══════════════════════════════════════
   // SEND MESSAGE
   // ══════════════════════════════════════
-  async onMessageSent(payload: OutgoingMessage | string) {
+  async onMessageSent(payload: OutgoingMessage | string | any) {
     // ── Step 1: Ensure session exists FIRST ──
     const text  = typeof payload === 'string' ? payload : payload.text;
     const image = typeof payload === 'string' ? undefined : payload.image;
+    const sessionProfile = typeof payload === 'string' ? undefined : payload.sessionProfile;
 
     if (!text?.trim() && !image) return;
     if (!this.sessionService.currentSessionId()) {
@@ -190,6 +192,53 @@ export class HomePage implements OnInit, AfterViewChecked {
       },
       error: () => {}
     });
+  }
+  async onProfileFormSubmitted(event: any) {
+    const { sessionId, formData, action } = event;
+
+    console.log('Profile form event received:', { sessionId, formData, action });
+
+    if (action === 'skip') {
+      // User skipped form - continue with general case (unisex, medium skin tone)
+      console.log('User skipped profile form');
+      this.sessionProfile = null;
+      return;
+    }
+
+    // User filled form - save session profile
+    this.sessionProfile = formData;
+    console.log('Session profile set:', this.sessionProfile);
+
+    // Now send the ORIGINAL message again with the profile data
+    await this.sendMessageWithProfile(sessionId);
+  }
+
+  /**
+   * NEW: Send the original message again but now with profile from form
+   */
+  async sendMessageWithProfile(sessionId: string) {
+    // Get the original user message from chat history
+    const lastUserMessage = [...this.messages()].reverse().find((m: any) => m.role === 'user');
+    if (!lastUserMessage) {
+      console.error('No user message found');
+      return;
+    }
+
+    const originalMessage = lastUserMessage.content;
+
+    // Add loading indicator
+    this.isLoading.set(true);
+
+    try {
+      // Send message AGAIN but with session profile included
+      await this.onMessageSent({
+        text: originalMessage,
+        sessionProfile: this.sessionProfile,  // Include form response
+      });
+    } catch (error) {
+      console.error('Error sending message with profile:', error);
+      this.isLoading.set(false);
+    }
   }
 
   private scrollToBottom() {

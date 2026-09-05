@@ -1,4 +1,3 @@
-<!-- REPLACE shared/components/message-bubble/message-bubble.component.html with this -->
 <!-- Shows first 3 outfits, then Load More adds 3 at a time up to 12 -->
 
 <div class="user-row" *ngIf="isUser">
@@ -9,6 +8,15 @@
   <div class="ai-avatar">W</div>
 
   <div class="ai-body">
+    <!-- ═══ PROFILE FORM (NEW) ═══ -->
+    <app-profile-form
+      *ngIf="isProfileForm"
+      [message]="profileFormData?.message"
+      [formFields]="profileFormData?.form_fields"
+      (formSubmit)="onProfileFormSubmit($event)"
+      (formSkip)="onProfileFormSkip()"
+    >
+    </app-profile-form>
 
     <!-- Error state -->
     <div class="error-msg" *ngIf="message.error">
