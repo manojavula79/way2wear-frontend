@@ -1,0 +1,251 @@
+// ═══════════════════════════════════════════════════════
+// Way2Wear — Outfit Preview
+// Minimal, premium, image-first layout matching the app's
+// ChatGPT-style conversational simplicity.
+//
+// THEME FIX: this used to define its own local purple palette
+// (--w2w-accent, --w2w-accent-soft, --w2w-surface, --w2w-ink,
+// --w2w-muted) in a :host block, which is why it looked purple/
+// lavender instead of matching the black-and-white home page.
+// Those local variables have been removed and every color now
+// points at the same global --w2w-* tokens the home page uses,
+// so both pages stay in sync automatically. No selectors, no
+// layout, no spacing/sizing were changed — colors only.
+// ═══════════════════════════════════════════════════════
+
+.preview-content {
+  // was #f6f6fa (hardcoded) — now the same page background token
+  // the home page's .page-shell uses, so the two pages match.
+  --background: var(--w2w-bg-page);
+}
+
+.preview-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: max(10px, env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+
+  // Gives the same "white card centered on gray page" look as
+  // .app-shell on the home page, instead of a flat single-tone page.
+  background: var(--w2w-bg-primary);
+}
+
+// ── Header ──────────────────────────────────────────────
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 2px 16px;
+  flex-shrink: 0;
+
+  .header-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--w2w-text-primary); // was var(--w2w-ink)
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .icon-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--w2w-border); // was a hardcoded rgba(0,0,0,0.12)
+    margin: 0 2px;
+  }
+}
+
+.icon-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--w2w-text-primary); // was hardcoded #2b2b33
+  font-size: 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.15s ease), opacity 0.15s ease;
+
+  &:active:not(:disabled) {
+    background: var(--w2w-bg-tertiary); // was hardcoded rgba(0,0,0,0.06)
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+// ── Image card ──────────────────────────────────────────
+.image-card {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--w2w-bg-primary); // was hardcoded #fff
+  box-shadow: var(--shadow-lg, 0 10px 30px rgba(20, 20, 20, 0.08)); // dropped the purple-tinted shadow color
+}
+
+.image-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--w2w-bg-secondary); // was var(--w2w-surface)
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.25s ease;
+
+    &.dimmed {
+      filter: brightness(0.55) blur(1px);
+    }
+  }
+
+  ion-spinner {
+    width: 34px;
+    height: 34px;
+    color: var(--w2w-text-primary); // was var(--w2w-accent)
+  }
+
+  .state-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .state-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--w2w-text-muted); // was var(--w2w-muted)
+    padding: 0 32px;
+    text-align: center;
+
+    ion-icon {
+      font-size: 30px;
+      color: var(--w2w-border-strong); // was hardcoded #c7cad6
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  .retry-btn {
+    margin-top: 2px;
+    padding: 9px 20px;
+    border-radius: 20px;
+    border: none;
+    background: var(--w2w-text-primary); // was var(--w2w-accent)
+    color: var(--w2w-bg-primary); // was hardcoded #fff, inverts cleanly with the line above
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .overlay-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// ── Edit bar ────────────────────────────────────────────
+.edit-bar-wrapper {
+  flex-shrink: 0;
+  padding-top: 14px;
+}
+
+.edit-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--w2w-bg-secondary); // was var(--w2w-surface)
+  border-radius: 26px;
+  padding: 6px 6px 6px 16px;
+}
+
+.edit-icon {
+  font-size: 18px;
+  color: var(--w2w-text-secondary); // was var(--w2w-accent)
+  flex-shrink: 0;
+}
+
+.edit-bar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14.5px;
+  color: var(--w2w-text-primary); // was var(--w2w-ink)
+  padding: 8px 0;
+
+  &::placeholder {
+    color: var(--w2w-text-muted); // was var(--w2w-muted)
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.send-btn {
+  appearance: none;
+  border: none;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--w2w-text-primary); // was var(--w2w-accent) — matches image2's dark send button
+  color: var(--w2w-bg-primary); // was hardcoded #fff
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+
+  ion-icon {
+    font-size: 15px;
+    transform: translateX(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--w2w-text-muted); // was var(--w2w-muted)
+  margin: 9px 0 0;
+}

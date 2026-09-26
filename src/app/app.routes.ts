@@ -28,6 +28,11 @@ export const routes: Routes = [
       import('./features/account/account.page').then((m) => m.AccountPage),
   },
   {
+    path: 'outfit-preview',
+    loadComponent: () => import('./pages/outfit-preview/outfit-preview.page')
+      .then(m => m.OutfitPreviewPage)
+  },
+  {
     path: 'chat/:sessionId',
     canActivate: [authGuard],
     loadComponent: () =>

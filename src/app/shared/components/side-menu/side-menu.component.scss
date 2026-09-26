@@ -119,11 +119,11 @@
     cursor: pointer;
     padding: 4px;
     border-radius: 50%;
-    color: var(--w2w-text-muted);
+    color: #6b6b6b;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    // opacity: 0;
     transition: var(--transition-fast);
 
     &:hover {

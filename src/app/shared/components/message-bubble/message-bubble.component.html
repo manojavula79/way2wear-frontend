@@ -1,5 +1,3 @@
-<!-- Shows first 3 outfits, then Load More adds 3 at a time up to 12 -->
-
 <div class="user-row" *ngIf="isUser">
   <div class="user-bubble">{{ message.content }}</div>
 </div>
@@ -40,7 +38,8 @@
         *ngFor="let outfit of displayedOutfits(); let i = index"
         [outfit]="outfit"
         [index]="i"
-        (viewDetails)="viewDetails.emit($event)">
+        (viewDetails)="onOutfitViewDetails($event)"
+      >
       </app-outfit-card>
 
       <!-- Load More button — appears after 3 outfits, up to 12 total -->
@@ -68,3 +67,11 @@
 
   </div>
 </div>
+<app-outfit-detail-modal
+  *ngIf="showDetailModal"
+  [outfit]="selectedOutfit"
+  [isOpen]="showDetailModal"
+  (close)="onCloseDetailModal()"
+  (previewImage)="onPreviewImage($event)"
+>
+</app-outfit-detail-modal>

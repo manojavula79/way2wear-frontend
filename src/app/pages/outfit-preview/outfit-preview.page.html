@@ -1,0 +1,87 @@
+<ion-content [fullscreen]="true" class="preview-content">
+  <div class="preview-wrapper">
+
+    <!-- Header -->
+    <div class="preview-header">
+      <button class="icon-btn" (click)="goBack()" aria-label="Back">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </button>
+
+      <h1 class="header-title">Way2Wear</h1>
+
+      <div class="header-actions">
+        <button
+          class="icon-btn"
+          (click)="downloadImage()"
+          [disabled]="!currentImageUrl"
+          aria-label="Download">
+          <ion-icon name="download-outline"></ion-icon>
+        </button>
+        <span class="icon-divider"></span>
+        <button
+          class="icon-btn"
+          (click)="shareImage()"
+          [disabled]="!currentImageUrl"
+          aria-label="Share">
+          <ion-icon name="share-social-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Image card -->
+    <div class="image-card">
+      <div class="image-frame">
+
+        <!-- Empty loading state (first generation, no image yet) -->
+        <div class="state-loading" *ngIf="isGenerating && !currentImageUrl">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+
+        <!-- Error state -->
+        <div class="state-error" *ngIf="imageLoadError && !currentImageUrl && !isGenerating">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <p>Couldn't generate this outfit.</p>
+          <button class="retry-btn" (click)="generateImage()">Try again</button>
+        </div>
+
+        <!-- Generated image -->
+        <ng-container *ngIf="currentImageUrl">
+          <img
+            [src]="currentImageUrl"
+            [class.dimmed]="isGenerating"
+            (load)="onImageLoad()"
+            (error)="onImageError()"
+            alt="Generated outfit" />
+
+          <!-- Overlay spinner while editing an existing image -->
+          <div class="overlay-loading" *ngIf="isGenerating">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+
+    <!-- Edit bar -->
+    <div class="edit-bar-wrapper">
+      <div class="edit-bar">
+        <ion-icon name="color-wand-outline" class="edit-icon"></ion-icon>
+        <input
+          type="text"
+          [(ngModel)]="editPrompt"
+          placeholder="Edit prompt"
+          [disabled]="isGenerating || !currentImageUrl"
+          (keyup.enter)="regenerateWithEdit()" />
+        <button
+          class="send-btn"
+          (click)="regenerateWithEdit()"
+          [disabled]="isGenerating || !editPrompt.trim() || !currentImageUrl"
+          aria-label="Send edit">
+          <ion-icon name="send"></ion-icon>
+        </button>
+      </div>
+      <p class="disclaimer">Way2Wear can make mistakes. Consider checking important info.</p>
+    </div>
+
+  </div>
+</ion-content>

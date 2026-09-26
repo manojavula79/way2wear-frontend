@@ -268,7 +268,7 @@
 }
 
 // ══════════════════════════════════════════
-// RESPONSIVE — DESKTOP EXPERIENCE
+// RESPONSIVE — DESKTOP EXPERIENCE (unchanged, <1024px)
 // ══════════════════════════════════════════
 @media (min-width: 768px) {
   .page-shell {
@@ -293,9 +293,87 @@
   }
 }
 
+// ══════════════════════════════════════════
+// RESPONSIVE — TRUE DESKTOP (GPT-style pinned sidebar)
+// Only kicks in at ≥1024px. Nothing below is touched.
+// ══════════════════════════════════════════
 @media (min-width: 1024px) {
+  :root {
+    --w2w-sidebar-width: 268px;
+  }
+
+  // Row layout: [sidebar] [chat column], no more centered card on gray bg
+  .page-shell {
+    align-items: stretch;
+    justify-content: flex-start;
+    background: var(--w2w-bg-primary);
+  }
+
+  // Sidebar becomes a permanent column, not an overlay drawer.
+  // We override the transform/position rules from the base .drawer class
+  // without touching them, so mobile/tablet behavior is unaffected.
+  .drawer.drawer-left {
+    position: relative;
+    flex-shrink: 0;
+    width: var(--w2w-sidebar-width);
+    height: 100%;
+    transform: none !important;
+    box-shadow: none;
+    border-radius: 0;
+    border-right: 1px solid var(--w2w-border);
+  }
+
+  // The toggle button becomes redundant once the sidebar is pinned open.
+  // Hide just that button; everything else in the navbar stays put.
+  .nav-btn[aria-label="Open menu"] {
+    display: none;
+  }
+
+  // Overlay should never dim the page for the (now pinned) left sidebar.
+  // It's still used for the profile drawer, which stays as an overlay.
+  .overlay {
+    left: var(--w2w-sidebar-width);
+  }
+
+  // Right (profile) drawer keeps overlay behavior but is capped in width
+  // and clipped to the chat column, like a settings flyout.
+  .drawer.drawer-right {
+    max-width: 340px;
+  }
+
+  // Chat column fills all remaining width instead of being capped at 480/520px.
   .app-shell {
-    max-width: 100%;
+    flex: 1;
+    max-width: none;
     height: 100vh;
+    height: 100dvh;
+  }
+
+  // Center content inside a comfortable reading width (~ChatGPT's ~768px),
+  // using the "auto side padding" trick so no extra wrapper elements are needed.
+  .hero-section,
+  .messages-list {
+    padding-left: max(28px, calc(50% - 384px));
+    padding-right: max(28px, calc(50% - 384px));
+  }
+
+  .hero-inner {
+    max-width: 480px;
+  }
+
+  .input-footer {
+    padding: 14px max(28px, calc(50% - 384px));
+  }
+
+  // Navbar title no longer needs to be perfectly centered over a narrow
+  // card — left-align it next to the (now hidden) menu button's old spot.
+  .navbar {
+    padding-left: 24px;
+
+    .navbar-title {
+      position: static;
+      transform: none;
+      margin-right: auto;
+    }
   }
 }

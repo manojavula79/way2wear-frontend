@@ -4,7 +4,9 @@ import { Message, OutfitResponse, Outfit } from '../../../core/models/message.mo
 import { OutfitCardComponent } from '../outfit-card/outfit-card.component';
 import { ChatService } from '../../../core/services/chat.service';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
-
+import { OutfitDetailModalComponent } from '../outfit-detail-modal/outfit-detail-modal.component';
+import { OutfitDetailComponent } from '../outfit-detail/outfit-detail.component'
+import { Router } from '@angular/router';
 const INITIAL_COUNT = 3;
 const INCREMENT = 3;
 const MAX_COUNT = 12;
@@ -14,7 +16,7 @@ const MAX_COUNT = 12;
   templateUrl: './message-bubble.component.html',
   styleUrls: ['./message-bubble.component.scss'],
   standalone: true,
-  imports: [CommonModule, OutfitCardComponent, ProfileFormComponent],
+  imports: [CommonModule, OutfitCardComponent, ProfileFormComponent, OutfitDetailModalComponent],
 })
 export class MessageBubbleComponent implements OnInit {
   @Input({ required: true }) message!: Message;
@@ -31,6 +33,8 @@ export class MessageBubbleComponent implements OnInit {
 
   // Tracks how many outfits are currently visible: 3, 6, 9, 12
   visibleCount = signal(INITIAL_COUNT);
+  selectedOutfit: any = null;
+  showDetailModal = false;
 
   // Slice of the full outfit list currently shown
   // displayedOutfits = computed<Outfit[]>(() => {
@@ -38,7 +42,10 @@ export class MessageBubbleComponent implements OnInit {
   //   return outfits.slice(0, this.visibleCount());
   // });
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private router: Router,
+  ) {}
 
   // ngOnInit() {
   //   this.isUser = this.message.role === 'user';
@@ -60,7 +67,6 @@ export class MessageBubbleComponent implements OnInit {
           // This is a profile form message
           this.isProfileForm = true;
           this.profileFormData = parsed;
-          console.log('Profile form detected:', parsed);
         } else {
           // Regular outfit response
           this.parsedResponse = this.chatService.parseResponse(this.message.content);
@@ -84,8 +90,6 @@ export class MessageBubbleComponent implements OnInit {
   }
 
   onProfileFormSubmit(formData: any) {
-    console.log('Profile form submitted:', formData);
-    
     // Emit the form data with session ID
     this.formSubmit.emit({
       sessionId: this.sessionId,
@@ -93,8 +97,6 @@ export class MessageBubbleComponent implements OnInit {
     });
   }
   onProfileFormSkip() {
-    console.log('Profile form skipped');
-    
     // Emit skip event with session ID
     this.formSubmit.emit({
       sessionId: this.sessionId,
@@ -112,5 +114,19 @@ export class MessageBubbleComponent implements OnInit {
     const total = this.parsedResponse?.outfits.length ?? 0;
     const cap = Math.min(total, MAX_COUNT);
     return this.visibleCount() < cap;
+  }
+  onOutfitViewDetails(outfit: any) {
+    this.selectedOutfit = outfit;
+    this.showDetailModal = true;
+  }
+  onCloseDetailModal() {
+    this.showDetailModal = false;
+    this.selectedOutfit = null;
+  }
+  onPreviewImage(outfit:any){
+    this.router.navigate(['/outfit-preview'], {
+      state: { outfit: outfit}
+    });
+    this.showDetailModal = false;
   }
 }

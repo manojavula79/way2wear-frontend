@@ -12,7 +12,8 @@ import { Outfit } from '../../../core/models/message.model';
 export class OutfitCardComponent {
   @Input({ required: true }) outfit!: Outfit;
   @Input() index: number = 0;
-  @Output() viewDetails = new EventEmitter<Outfit>();
+  // @Output() viewDetails = new EventEmitter<Outfit>(); //task2
+  @Output() viewDetails = new EventEmitter<any>();
 
   imgErrors: Record<string, boolean> = {};
 
@@ -38,5 +39,9 @@ export class OutfitCardComponent {
     } catch {
       return 'rgba(200,200,200,0.15)';
     }
+  }
+  // Add method task2
+  onViewDetails() {
+    this.viewDetails.emit(this.outfit);
   }
 }
