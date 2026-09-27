@@ -196,18 +196,13 @@ export class HomePage implements OnInit, AfterViewChecked {
   async onProfileFormSubmitted(event: any) {
     const { sessionId, formData, action } = event;
 
-    console.log('Profile form event received:', { sessionId, formData, action });
-
     if (action === 'skip') {
-      // User skipped form - continue with general case (unisex, medium skin tone)
-      console.log('User skipped profile form');
       this.sessionProfile = null;
       return;
     }
 
     // User filled form - save session profile
     this.sessionProfile = formData;
-    console.log('Session profile set:', this.sessionProfile);
 
     // Now send the ORIGINAL message again with the profile data
     await this.sendMessageWithProfile(sessionId);

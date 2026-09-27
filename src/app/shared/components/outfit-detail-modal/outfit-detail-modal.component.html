@@ -1,0 +1,100 @@
+<div class="overlay" *ngIf="isOpen" (click)="closeModal()"></div>
+
+<!--
+  NOTE: [@slideUp] was removed here on purpose.
+  It was an Angular *animation trigger* binding with no matching
+  `animations: []` metadata on the component, which threw a console
+  error every time this opened. The slide-up motion already exists
+  as a plain CSS `animation: slideUp ...` below, so nothing visual is lost.
+-->
+<div class="detail-modal" *ngIf="isOpen">
+  <div class="modal-inner">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">{{ getOutfitSummary() }}</h2>
+      <button class="close-btn" (click)="closeModal()" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <p class="o-note" *ngIf="outfit?.note">{{ outfit.note }}</p>
+
+      <!-- TOP / BOTTOM, driven off parts() same as outfit-detail.component -->
+      <div class="item-block" *ngFor="let part of parts()">
+        <div class="img-wrap">
+          <img
+            *ngIf="part.item?.image"
+            [src]="part.item?.image"
+            [alt]="part.item?.title"
+            (error)="onImgErr($event, part.item)"
+          />
+          <div *ngIf="!part.item?.image" class="placeholder">No image</div>
+          <span class="tag">{{ part.label }}</span>
+        </div>
+
+        <div class="item-info">
+          <p class="i-title">{{ part.item?.title || (part.label + ' Wear') }}</p>
+          <p class="i-brand" *ngIf="part.item?.brand">{{ part.item?.brand }}</p>
+          <p class="i-price" *ngIf="part.item?.price">₹{{ part.item?.price }}</p>
+
+          <div class="row-btns">
+            <button
+              class="buy-btn"
+              *ngIf="part.item?.url"
+              (click)="openShoppingLink(part.item!.url!)"
+            >
+              Buy on Amazon
+            </button>
+
+            <!-- Like button: was present in the .ts logic already, just never rendered -->
+            <button
+              class="like-btn"
+              [class.on]="liked()[part.label]"
+              (click)="toggleLike(part)"
+              aria-label="Like"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24"
+                [attr.fill]="liked()[part.label] ? '#dc3545' : 'none'">
+                <path d="M12 20s-7-4.5-7-10a4 4 0 017-2 4 4 0 017 2c0 5.5-7 10-7 10z"
+                  stroke="#dc3545" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accessory / shoe note -->
+      <div class="note-box" *ngIf="outfit?.shoe_note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M4 10c0 2 1 4 3 5l2 4h6l2-4c2-1 3-3 3-5"
+            stroke="#c79a4b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p>{{ outfit.shoe_note }}</p>
+      </div>
+
+      <!-- Footer actions -->
+      <div class="modal-footer">
+        <button class="save-outfit" [class.saved]="saved()" (click)="toggleSave()">
+          <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="saved() ? '#1a1a1a' : 'none'">
+            <path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+          {{ saved() ? 'Saved' : 'Save this outfit' }}
+        </button>
+
+        <button class="btn btn-primary" (click)="onPreviewClick()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"
+              fill="currentColor"/>
+          </svg>
+          Preview Outfit
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
