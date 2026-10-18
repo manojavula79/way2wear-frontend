@@ -1,8 +1,11 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { ChatSession, Message } from '../models/message.model';
+import { environment } from '@env/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
+  private http = inject(HttpClient);
   private readonly STORAGE_KEY = 'w2w_sessions';
 
   private _sessions         = signal<ChatSession[]>(this.loadSessions());
@@ -88,14 +91,29 @@ export class SessionService {
   }
 
   // ── Delete session ────────────────────
-  deleteSession(id: string) {
-    this._sessions.update(s => s.filter(s => s.id !== id));
-    if (this._currentSessionId() === id) {
-      const remaining = this._sessions();
-      this._currentSessionId.set(remaining[0]?.id ?? null);
-    }
-    this.persist();
+deleteSession(id: string) {
+  // Optimistic UI update
+  this._sessions.update(s => s.filter(session => session.id !== id));
+
+  if (this._currentSessionId() === id) {
+    const remaining = this._sessions();
+    this._currentSessionId.set(remaining[0]?.id ?? null);
   }
+
+  this.persist();
+
+  this.deleteSessionById(id).subscribe({
+    next: () => console.log('Deleted on server:', id),
+    error: (err) => {
+      console.error('Delete failed:', err);
+      // optionally: reload sessions from the server to restore state
+    },
+  });
+}
+
+deleteSessionById(id: string) {
+  return this.http.delete<void>(`${environment.apiUrl}/sessions/${id}`);
+}
 
   // ── Clear all ─────────────────────────
   clearAll() {

@@ -32,7 +32,7 @@
         <path d="M5.5 9.5L3 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
       <span class="session-title">{{ session.title }}</span>
-      <button
+      <button style="z-index: 20000 !important;"
         class="delete-btn"
         (click)="onDeleteSession($event, session.id)"
         aria-label="Delete session"

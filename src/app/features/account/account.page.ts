@@ -18,6 +18,7 @@ import {
 export class AccountPage {
   private userService = inject(UserService);
   private router      = inject(Router);
+  private selectedFile: File | null = null;
 
   profile = this.userService.profile;
 
@@ -39,17 +40,17 @@ export class AccountPage {
 
   saved = signal(false);
   age = signal<number | null>(this.profile().age ?? null);
-  onPhotoSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Please choose an image under 2MB.');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => this.avatarUrl.set(reader.result as string);
-    reader.readAsDataURL(file);
-  }
+  // onPhotoSelected(event: Event) {
+  //   const file = (event.target as HTMLInputElement).files?.[0];
+  //   if (!file) return;
+  //   if (file.size > 2 * 1024 * 1024) {
+  //     alert('Please choose an image under 2MB.');
+  //     return;
+  //   }
+  //   const reader = new FileReader();
+  //   reader.onload = () => this.avatarUrl.set(reader.result as string);
+  //   reader.readAsDataURL(file);
+  // }
 
   setGender(g: 'male' | 'female' | 'unisex') { this.gender.set(g); }
 
@@ -63,7 +64,56 @@ export class AccountPage {
   }
 
   // ── Save ──────────────────────────────────
+  // save() {
+  //   this.userService.updateProfile({
+  //     name:            this.name().trim() || 'Fashion Enthusiast',
+  //     gender:          this.gender(),
+  //     heightCm:        this.heightCm() ?? undefined,
+  //     age:             this.age() ?? undefined,
+  //     skinTone:        this.skinTone(),
+  //     stylePreference: this.style(),
+  //     fitType:         this.fit(),
+  //     budgetRange:     this.budget(),
+  //     avatarUrl:       this.avatarUrl(),
+  //   });
+  //   this.saved.set(true);
+  //   setTimeout(() => this.saved.set(false), 2500);
+  // }
+
+  goBack() { this.router.navigate(['/home']); }
+
+  get initials(): string {
+    const n = this.name().trim();
+    if (!n) return 'W';
+    const parts = n.split(' ');
+    return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
+  }
+
+  onPhotoSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('Please choose an image under 2MB.'); return; }
+    this.selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = () => this.avatarUrl.set(reader.result as string); // preview only
+    reader.readAsDataURL(file);
+  }
+
   save() {
+    if (this.selectedFile) {
+      this.userService.uploadAvatar(this.selectedFile).subscribe({
+        next: () => {
+          this.selectedFile = null;
+          this.saveRest();
+        },
+        error: () => alert('Photo upload failed. Please try again.'),
+      });
+    } else {
+      this.saveRest();
+    }
+  }
+
+  private saveRest() {
     this.userService.updateProfile({
       name:            this.name().trim() || 'Fashion Enthusiast',
       gender:          this.gender(),
@@ -73,18 +123,9 @@ export class AccountPage {
       stylePreference: this.style(),
       fitType:         this.fit(),
       budgetRange:     this.budget(),
-      avatarUrl:       this.avatarUrl(),
+      // avatarUrl intentionally omitted; the upload endpoint already saved it
     });
     this.saved.set(true);
     setTimeout(() => this.saved.set(false), 2500);
-  }
-
-  goBack() { this.router.navigate(['/home']); }
-
-  get initials(): string {
-    const n = this.name().trim();
-    if (!n) return 'W';
-    const parts = n.split(' ');
-    return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
   }
 }

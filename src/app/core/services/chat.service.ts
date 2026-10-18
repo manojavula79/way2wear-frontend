@@ -69,7 +69,7 @@ export class ChatService {
 
   getSessions() { return this.http.get<any[]>(`${environment.apiUrl}/sessions`); }
   getSession(id: string) { return this.http.get<any>(`${environment.apiUrl}/sessions/${id}`); }
-  deleteSession(id: string) { return this.http.delete<void>(`${environment.apiUrl}/sessions/${id}`); }
+  deleteSession(id: string) {console.log(id); return this.http.delete<void>(`${environment.apiUrl}/sessions/${id}`); }
 
   parseResponse(raw: string): OutfitResponse {
     try {
