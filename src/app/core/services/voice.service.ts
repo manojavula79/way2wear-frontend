@@ -1,85 +1,243 @@
 import { Injectable, signal } from '@angular/core';
 
+type VoiceTextHandler = (full: string, isFinal: boolean) => void;
+type VoiceFinishHandler = () => void;
+
+interface SpeechRecognitionAlternativeLike {
+  transcript: string;
+}
+
+interface SpeechRecognitionResultLike {
+  readonly isFinal: boolean;
+  readonly length: number;
+  readonly [index: number]: SpeechRecognitionAlternativeLike;
+}
+
+interface SpeechRecognitionEventLike {
+  readonly resultIndex: number;
+  readonly results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+interface SpeechRecognitionErrorEventLike {
+  readonly error: string;
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort?(): void;
+}
+
+interface SpeechRecognitionWindow extends Window {
+  SpeechRecognition?: new () => SpeechRecognitionLike;
+  webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VoiceService {
-  isListening = signal(false);
-  interim = signal('');           // live partial text while speaking
-  supported = signal(true);
+  readonly isListening = signal(false);
+  readonly interim = signal('');           // live partial text while speaking
+  readonly supported = signal(true);
+  readonly error = signal<string | null>(null);
 
-  private recognition: any = null;
+  private recognition: SpeechRecognitionLike | null = null;
   private finalText = '';
-  private onText: ((full: string, isFinal: boolean) => void) | null = null;
+  private onText: VoiceTextHandler | null = null;
+  private onFinish: VoiceFinishHandler | null = null;
   private manualStop = false;
+  private sessionActive = false;
+  private cancelled = false;
 
   constructor() {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { this.supported.set(false); return; }
+    const win = typeof window === 'undefined'
+      ? null
+      : window as SpeechRecognitionWindow;
+    const SpeechRecognitionCtor = win?.SpeechRecognition ?? win?.webkitSpeechRecognition;
 
-    this.recognition = new SR();
+    if (!SpeechRecognitionCtor) {
+      this.supported.set(false);
+      return;
+    }
+
+    this.recognition = new SpeechRecognitionCtor();
     this.recognition.continuous = true;        // keep listening until stopped
     this.recognition.interimResults = true;    // emit partial words live
     this.recognition.lang = 'en-IN';
     this.recognition.maxAlternatives = 1;
 
-    this.recognition.onresult = (event: any) => {
-      let interimChunk = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          this.finalText += (this.finalText ? ' ' : '') + transcript.trim();
-        } else {
-          interimChunk += transcript;
-        }
-      }
-      this.interim.set(interimChunk);
-      const full = (this.finalText + ' ' + interimChunk).trim();
-      this.onText?.(full, false);
-    };
-
-    this.recognition.onerror = (e: any) => {
-      // 'no-speech' / 'aborted' are normal; don't treat as fatal
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-        this.supported.set(false);
-      }
-      this.stop();
-    };
-
-    this.recognition.onend = () => {
-      // Browser auto-stops after silence; if the user hasn't tapped stop, restart
-      if (this.isListening() && !this.manualStop) {
-        try { this.recognition.start(); return; } catch {}
-      }
-      this.finishSession();
-    };
+    this.recognition.onresult = (event) => this.handleResult(event);
+    this.recognition.onerror = (event) => this.handleError(event);
+    this.recognition.onend = () => this.handleEnd();
   }
 
-  /** Begin listening. onText(fullText, isFinal) fires live and once more on stop. */
-  start(onText: (full: string, isFinal: boolean) => void) {
-    if (!this.recognition || this.isListening()) return;
+  /**
+   * Begin listening. `onText` fires live and once more with the final transcript.
+   * `onFinish` always fires when the session ends, including errors and cancellation.
+   */
+  start(onText: VoiceTextHandler, onFinish?: VoiceFinishHandler): boolean {
+    if (!this.recognition) {
+      this.error.set('Voice input is not supported in this browser. Please type your message instead.');
+      return false;
+    }
+    if (this.sessionActive) return false;
+
+    this.error.set(null);
     this.onText = onText;
+    this.onFinish = onFinish ?? null;
     this.finalText = '';
-    this.manualStop = false;
     this.interim.set('');
+    this.manualStop = false;
+    this.cancelled = false;
+    this.sessionActive = true;
+    this.isListening.set(true);
+
     try {
       this.recognition.lang = this.detectLang();
       this.recognition.start();
-      this.isListening.set(true);
-    } catch { /* already started */ }
+      return true;
+    } catch {
+      this.sessionActive = false;
+      this.isListening.set(false);
+      this.interim.set('');
+      this.onText = null;
+      this.onFinish = null;
+      this.error.set('Voice input could not start. Please try again.');
+      return false;
+    }
   }
 
-  stop() {
-    if (!this.recognition) return;
+  /** Stop recording and deliver the final transcript. */
+  stop(): void {
+    if (!this.recognition || !this.sessionActive) return;
     this.manualStop = true;
-    try { this.recognition.stop(); } catch {}
+    try {
+      this.recognition.stop();
+    } catch {
+      this.finishSession();
+    }
   }
 
-  private finishSession() {
+  /** Discard the current session without delivering its transcript. */
+  cancel(): void {
+    if (!this.recognition || !this.sessionActive) return;
+    this.cancelled = true;
+    this.manualStop = true;
+    try {
+      this.recognition.abort?.();
+    } catch {
+      // The session is finalized below even if the browser cannot abort it.
+    }
+    this.finishSession(false);
+  }
+
+  clearError(): void {
+    this.error.set(null);
+  }
+
+  private handleResult(event: SpeechRecognitionEventLike): void {
+    if (!this.sessionActive || this.cancelled) return;
+
+    let interimChunk = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+      const transcript = result[0]?.transcript ?? '';
+
+      if (result.isFinal) {
+        const trimmed = transcript.trim();
+        if (trimmed) {
+          this.finalText += (this.finalText ? ' ' : '') + trimmed;
+        }
+      } else {
+        interimChunk += transcript;
+      }
+    }
+
+    this.interim.set(interimChunk);
+    const full = (this.finalText + ' ' + interimChunk).trim();
+    this.onText?.(full, false);
+  }
+
+  private handleError(event: SpeechRecognitionErrorEventLike): void {
+    if (!this.sessionActive) return;
+
+    const message = this.messageForError(event.error);
+    if (message) this.error.set(message);
+
+    this.manualStop = true;
+    try {
+      this.recognition?.abort?.();
+    } catch {
+      // Ignore abort failures; finishSession below cleans up the session.
+    }
+
+    // Keep any partial transcript so the user can review it instead of losing it.
+    this.finishSession(event.error !== 'aborted');
+  }
+
+  private handleEnd(): void {
+    if (!this.sessionActive) return;
+
+    // The browser may stop on silence. Keep the session alive until the user stops.
+    if (this.isListening() && !this.manualStop) {
+      try {
+        this.recognition?.start();
+        return;
+      } catch {
+        // Fall through and finish cleanly if restart is not possible.
+      }
+    }
+
+    this.finishSession();
+  }
+
+  private finishSession(deliverText = true): void {
+    if (!this.sessionActive) return;
+
     const full = (this.finalText + ' ' + this.interim()).trim();
+    const textHandler = this.onText;
+    const finishHandler = this.onFinish;
+    const wasCancelled = this.cancelled;
+
+    this.sessionActive = false;
+    this.manualStop = false;
+    this.cancelled = false;
     this.isListening.set(false);
     this.interim.set('');
-    if (full) this.onText?.(full, true);  // deliver final text
-    this.onText = null;
     this.finalText = '';
+    this.onText = null;
+    this.onFinish = null;
+
+    if (deliverText && !wasCancelled && full) {
+      textHandler?.(full, true);
+    }
+    finishHandler?.();
+  }
+
+  private messageForError(code: string): string | null {
+    switch (code) {
+      case 'not-allowed':
+      case 'service-not-allowed':
+        return 'Microphone access is blocked. Allow microphone access in your browser and try again.';
+      case 'audio-capture':
+        return 'No microphone was found. Check your device and try again.';
+      case 'network':
+        return 'Voice input needs an internet connection. Check your connection and try again.';
+      case 'language-not-supported':
+        return 'Voice input does not support your device language. Please type your message instead.';
+      case 'no-speech':
+        return 'No speech was detected. Tap the mic and try again.';
+      case 'aborted':
+        return null;
+      default:
+        return 'Voice input failed. Please try again.';
+    }
   }
 
   /** Best-effort language guess from device locale (Indian languages supported by Chrome). */

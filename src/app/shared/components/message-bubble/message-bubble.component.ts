@@ -1,11 +1,17 @@
-import { Component, Input, OnInit, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Message, OutfitResponse, Outfit } from '../../../core/models/message.model';
+import {
+  Message,
+  OutfitResponse,
+  Outfit,
+  DynamicFormResponse,
+  ProfileFormSubmission,
+  SubmittedFormValues,
+} from '../../../core/models/message.model';
 import { OutfitCardComponent } from '../outfit-card/outfit-card.component';
 import { ChatService } from '../../../core/services/chat.service';
 import { ProfileFormComponent } from '../profile-form/profile-form.component';
 import { OutfitDetailModalComponent } from '../outfit-detail-modal/outfit-detail-modal.component';
-import { OutfitDetailComponent } from '../outfit-detail/outfit-detail.component'
 import { Router } from '@angular/router';
 const INITIAL_COUNT = 3;
 const INCREMENT = 3;
@@ -21,14 +27,16 @@ const MAX_COUNT = 12;
 export class MessageBubbleComponent implements OnInit {
   @Input({ required: true }) message!: Message;
   @Input() sessionId: string = '';
+  /** Parent-owned request state so the form can never get stuck loading. */
+  @Input() submitting = false;
   @Output() viewDetails = new EventEmitter<Outfit>();
-  @Output() formSubmit = new EventEmitter<any>();
+  @Output() formSubmit = new EventEmitter<ProfileFormSubmission>();
 
-  Math = Math;
   parsedResponse: OutfitResponse | null = null;
+  errorText = '';
   isUser = false;
   isProfileForm = false;
-  profileFormData: any = null;
+  profileFormData: DynamicFormResponse | null = null;
   displayedOutfits = signal<Outfit[]>([]);
 
   // Tracks how many outfits are currently visible: 3, 6, 9, 12
@@ -36,85 +44,113 @@ export class MessageBubbleComponent implements OnInit {
   selectedOutfit: any = null;
   showDetailModal = false;
 
-  // Slice of the full outfit list currently shown
-  // displayedOutfits = computed<Outfit[]>(() => {
-  //   const outfits = this.parsedResponse?.outfits ?? [];
-  //   return outfits.slice(0, this.visibleCount());
-  // });
-
   constructor(
     private chatService: ChatService,
     private router: Router,
   ) {}
 
-  // ngOnInit() {
-  //   this.isUser = this.message.role === 'user';
-  //   if (!this.isUser) {
-  //     this.parsedResponse = this.chatService.parseResponse(this.message.content);
-  //     // Reset visible count in case ngOnInit ever re-runs with a different message
-  //     this.visibleCount.set(INITIAL_COUNT);
-  //   }
-  // }
   ngOnInit() {
     this.isUser = this.message.role === 'user';
-    
+
     if (!this.isUser) {
-      // Check if this is a profile form response
-      try {
-        const parsed = JSON.parse(this.message.content);
-        
-        if (parsed.needs_form === true) {
-          // This is a profile form message
-          this.isProfileForm = true;
-          this.profileFormData = parsed;
-        } else {
-          // Regular outfit response
-          this.parsedResponse = this.chatService.parseResponse(this.message.content);
-          if (this.parsedResponse) {
-            this.updateDisplayed();
-          }
-        }
-      } catch {
-        // Not JSON, treat as regular text
-        this.parsedResponse = this.chatService.parseResponse(this.message.content);
-        if (this.parsedResponse) {
-          this.updateDisplayed();
-        }
-      }
+      this.hydrateAssistantMessage();
     }
   }
+
+  private hydrateAssistantMessage(): void {
+    if (this.message.error) {
+      this.errorText = this.extractErrorMessage(this.message.content);
+      return;
+    }
+
+    const content = this.chatService.parseAssistantContent(this.message.content);
+
+    if (content.kind === 'form') {
+      this.isProfileForm = true;
+      this.profileFormData = content.form;
+      return;
+    }
+
+    this.parsedResponse = content.kind === 'outfits'
+      ? content.response
+      : { message: content.text, tip: null, outfits: [] };
+    this.updateDisplayed();
+  }
+
+  private extractErrorMessage(raw: string): string {
+    const content = this.chatService.parseAssistantContent(raw);
+    if (content.kind === 'outfits' && content.response.message) {
+      return content.response.message;
+    }
+    if (content.kind === 'form' && content.form.message) {
+      return content.form.message;
+    }
+    if (content.kind === 'text' && content.text) {
+      return content.text;
+    }
+    return "I'm having trouble right now. Please try again in a moment.";
+  }
+
   updateDisplayed() {
     if (this.parsedResponse?.outfits) {
       this.displayedOutfits.set(this.parsedResponse.outfits.slice(0, this.visibleCount()));
     }
   }
 
-  onProfileFormSubmit(formData: any) {
-    // Emit the form data with session ID
+  onProfileFormSubmit(formData: SubmittedFormValues) {
+    if (this.submitting) return;
     this.formSubmit.emit({
       sessionId: this.sessionId,
-      formData: formData,
+      messageId: this.message.id,
+      formType: this.profileFormData?.form_type,
+      formData,
     });
   }
+
   onProfileFormSkip() {
-    // Emit skip event with session ID
+    if (this.submitting) return;
     this.formSubmit.emit({
       sessionId: this.sessionId,
+      messageId: this.message.id,
+      formType: this.profileFormData?.form_type,
       action: 'skip',
     });
   }
 
+  totalOutfitCount(): number {
+    return Math.min(this.parsedResponse?.outfits.length ?? 0, MAX_COUNT);
+  }
+
+  nextBatchCount(): number {
+    const next = Math.min(
+      this.visibleCount() + INCREMENT,
+      this.totalOutfitCount(),
+    );
+    return Math.max(0, next - this.visibleCount());
+  }
+
   loadMore(): void {
-    const total = this.parsedResponse?.outfits.length ?? 0;
-    const cap = Math.min(total, MAX_COUNT);
-    this.visibleCount.update(current => Math.min(current + INCREMENT, cap));
+    const next = Math.min(
+      this.visibleCount() + INCREMENT,
+      this.totalOutfitCount(),
+    );
+
+    if (next <= this.visibleCount()) return;
+
+    this.visibleCount.set(next);
+    // visibleCount changed, so the slice powering the template must be
+    // refreshed explicitly for the new cards to render.
+    this.updateDisplayed();
   }
 
   hasMore(): boolean {
-    const total = this.parsedResponse?.outfits.length ?? 0;
-    const cap = Math.min(total, MAX_COUNT);
-    return this.visibleCount() < cap;
+    return this.visibleCount() < this.totalOutfitCount();
   }
+
+  trackByOutfit(_: number, outfit: Outfit): string {
+    return outfit.id;
+  }
+
   onOutfitViewDetails(outfit: any) {
     this.selectedOutfit = outfit;
     this.showDetailModal = true;

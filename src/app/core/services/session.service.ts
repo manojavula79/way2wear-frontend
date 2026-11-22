@@ -40,6 +40,48 @@ export class SessionService {
     this.persist();
   }
 
+  /**
+   * The backend creates the real session on the first message. Move the
+   * optimistic local session (and its user message) to the backend ID so the
+   * current conversation keeps its history and can continue after the reply.
+   */
+  adoptBackendSession(localId: string, backendId: string) {
+    if (!localId || !backendId || localId === backendId) {
+      this._currentSessionId.set(backendId);
+      return;
+    }
+
+    this._sessions.update(sessions => {
+      const local = sessions.find(s => s.id === localId);
+      if (!local) return sessions;
+
+      const existing = sessions.find(s => s.id === backendId);
+      if (!existing) {
+        return sessions.map(s => s.id === localId
+          ? { ...s, id: backendId, updatedAt: new Date() }
+          : s);
+      }
+
+      const mergedMessages = [...local.messages, ...existing.messages]
+        .filter((m, index, list) => list.findIndex(x => x.id === m.id) === index);
+
+      return sessions
+        .filter(s => s.id !== localId)
+        .map(s => s.id === backendId
+          ? {
+              ...s,
+              messages: mergedMessages,
+              title: s.title === 'New Style Session' ? local.title : s.title,
+              createdAt: local.createdAt,
+              updatedAt: new Date(),
+            }
+          : s);
+    });
+
+    this._currentSessionId.set(backendId);
+    this.persist();
+  }
+
   // ── Set active session ────────────────
   setCurrentSession(id: string) {
     this._currentSessionId.set(id);

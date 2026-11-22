@@ -18,6 +18,39 @@ export interface OutfitResponse {
   tip?: string | null;
   outfits: Outfit[];
 }
+
+/**
+ * Dynamic form returned by the backend when it needs more details before
+ * generating recommendations (e.g. styling another person).
+ */
+export interface DynamicFormField {
+  type?: string;
+  options?: string[];
+  required?: boolean;
+}
+
+export interface DynamicFormResponse {
+  needs_form: true;
+  form_type?: string;
+  message: string;
+  form_fields: Record<string, DynamicFormField>;
+}
+
+export interface SubmittedFormValues {
+  gender?: string | null;
+  skin_tone?: string | null;
+  size?: string | null;
+  [key: string]: string | null | undefined;
+}
+
+export interface ProfileFormSubmission {
+  sessionId: string;
+  messageId: string;
+  formType?: string;
+  formData?: SubmittedFormValues;
+  action?: 'skip';
+}
+
 export interface OutfitItem {
   title: string;
   brand?: string;

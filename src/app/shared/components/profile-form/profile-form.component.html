@@ -6,7 +6,9 @@
   <!-- GENDER FIELD (Required) -->
   <div class="form-field" *ngIf="formFields['gender']">
     <label class="field-label">
-      Gender <span class="required">*</span>
+      Gender
+      <span class="required" *ngIf="isRequired('gender')">*</span>
+      <span class="optional" *ngIf="!isRequired('gender')">(Optional)</span>
     </label>
     <div class="button-group">
       <button
@@ -14,7 +16,7 @@
         class="option-button"
         [class.selected]="selectedGender === option.toLowerCase()"
         (click)="selectGender(option)"
-        [disabled]="isSubmitting"
+        [disabled]="submitting"
       >
         {{ option }}
       </button>
@@ -25,7 +27,8 @@
   <div class="form-field" *ngIf="formFields['skin_tone']">
     <label class="field-label">
       Skin Tone
-      <span class="optional">(Optional)</span>
+      <span class="required" *ngIf="isRequired('skin_tone')">*</span>
+      <span class="optional" *ngIf="!isRequired('skin_tone')">(Optional)</span>
     </label>
     <div class="button-group">
       <button
@@ -34,7 +37,7 @@
         [class.selected]="selectedSkinTone === option.toLowerCase()"
         [style.background]="getToneColor(option)"
         (click)="selectSkinTone(option)"
-        [disabled]="isSubmitting"
+        [disabled]="submitting"
       >
         {{ option }}
       </button>
@@ -45,13 +48,14 @@
   <div class="form-field" *ngIf="formFields['size']">
     <label class="field-label">
       Size
-      <span class="optional">(Optional)</span>
+      <span class="required" *ngIf="isRequired('size')">*</span>
+      <span class="optional" *ngIf="!isRequired('size')">(Optional)</span>
     </label>
     <select
       class="size-dropdown"
       [value]="selectedSize"
-      (change)="selectedSize = $any($event.target).value"
-      [disabled]="isSubmitting"
+      (change)="selectSize($any($event.target).value)"
+      [disabled]="submitting"
     >
       <option value="">Select size...</option>
       <option
@@ -63,21 +67,25 @@
     </select>
   </div>
 
+  <p class="form-error" *ngIf="validationError" role="alert">
+    {{ validationError }}
+  </p>
+
   <!-- Action Buttons -->
   <div class="form-actions">
     <button
       class="btn btn-primary"
       (click)="submitForm()"
-      [disabled]="isSubmitting"
+      [disabled]="submitting"
     >
-      <span *ngIf="!isSubmitting">Continue</span>
-      <span *ngIf="isSubmitting">Loading...</span>
+      <span *ngIf="!submitting">Continue</span>
+      <span *ngIf="submitting">Loading...</span>
     </button>
 
     <button
       class="btn btn-secondary"
       (click)="skipForm()"
-      [disabled]="isSubmitting"
+      [disabled]="submitting"
     >
       Skip for now
     </button>

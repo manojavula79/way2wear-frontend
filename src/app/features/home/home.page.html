@@ -61,7 +61,10 @@
         <app-message-bubble
           *ngFor="let message of messages(); trackBy: trackById"
           [message]="message"
+          [sessionId]="currentSession()?.id || ''"
+          [submitting]="isLoading()"
           (viewDetails)="selectedOutfit.set($event)"
+          (formSubmit)="onProfileFormSubmitted($event)"
         ></app-message-bubble>
 
         <app-typing-indicator *ngIf="isLoading()"></app-typing-indicator>
@@ -73,6 +76,7 @@
 
     <footer class="input-footer">
       <app-message-input
+        [disabled]="isLoading()"
         (messageSent)="onMessageSent($event)"
       ></app-message-input>
     </footer>

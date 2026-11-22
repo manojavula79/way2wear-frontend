@@ -139,6 +139,18 @@
   }
 }
 
+// ── Validation ──
+.form-error {
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(211, 47, 47, 0.2);
+  border-radius: 10px;
+  background: rgba(211, 47, 47, 0.06);
+  color: #b3261e;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
 // ── Action Buttons ──
 .form-actions {
   display: grid;
