@@ -35,13 +35,15 @@
       </div>
 
       <!-- Outfit cards — INITIALLY SHOW 3 -->
-      <app-outfit-card
-        *ngFor="let outfit of displayedOutfits(); let i = index; trackBy: trackByOutfit"
-        [outfit]="outfit"
-        [index]="i"
-        (viewDetails)="onOutfitViewDetails($event)"
-      >
-      </app-outfit-card>
+      <div class="outfit-grid">
+        <app-outfit-card
+          *ngFor="let outfit of displayedOutfits(); let i = index; trackBy: trackByOutfit"
+          [outfit]="outfit"
+          [index]="i"
+          (viewDetails)="onOutfitViewDetails($event)"
+        >
+        </app-outfit-card>
+      </div>
 
       <!-- Load More button — appears after 3 outfits, up to 12 total -->
       <div class="load-more-wrap" *ngIf="hasMore()">

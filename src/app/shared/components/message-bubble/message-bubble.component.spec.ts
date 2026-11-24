@@ -119,6 +119,14 @@ describe('MessageBubbleComponent', () => {
     return fixture.nativeElement.querySelector('.load-more-btn') as HTMLButtonElement | null;
   }
 
+  it('renders outfit cards inside the responsive grid container', () => {
+    renderOutfits(3);
+
+    const grid = fixture.nativeElement.querySelector('.outfit-grid') as HTMLElement;
+    expect(grid).not.toBeNull();
+    expect(grid.querySelectorAll('app-outfit-card').length).toBe(3);
+  });
+
   it('initially shows three outfits and reveals three more on each click', () => {
     renderOutfits(8);
 

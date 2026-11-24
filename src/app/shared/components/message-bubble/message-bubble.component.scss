@@ -49,6 +49,29 @@
   min-width: 0;
 }
 
+// ── Outfit cards ──────────────────────────
+// One column on phones, two on tablets, three where the desktop chat
+// column has enough room. Cards fill the available content width.
+.outfit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 4px;
+}
+
+@media (min-width: 768px) {
+  .outfit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .outfit-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .ai-text {
   font-size: 14.5px;
   color: var(--w2w-text-primary);

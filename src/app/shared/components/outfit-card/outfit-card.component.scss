@@ -1,57 +1,74 @@
-// REPLACE shared/components/outfit-card/outfit-card.component.scss with this
+// Compact outfit card — fills one cell of the outfit grid.
+:host {
+  display: block;
+  min-width: 0;
+  height: 100%;
+}
 
 .outfit-card {
-  padding: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 16px;
-  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px;
+  border: 1px solid var(--w2w-border);
+  border-radius: var(--radius-md);
+  background: var(--w2w-bg-primary);
 }
 
 .card-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
 }
 
 .outfit-index {
-  font-size: 0.76rem;
-  color: #8a8a8a;
+  font-size: 0.66rem;
+  color: var(--w2w-text-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .outfit-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  line-height: 1.25;
   margin: 0;
-  color: #1a1a1a;
+  color: var(--w2w-text-primary);
+  min-height: 2.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .product-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .product-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .product-image {
   position: relative;
   width: 100%;
-  aspect-ratio: 2/3;
-  border-radius: 12px;
+  aspect-ratio: 3 / 4;
+  max-height: 160px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
-  background: #f6f5f2;
+  background: var(--w2w-bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .product-img {
@@ -67,16 +84,20 @@
 
 .brand-badge {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 12px);
   background: rgba(0, 0, 0, 0.8);
   color: #fff;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 5px;
+  padding: 2px 5px;
+  border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .product-info {
@@ -85,19 +106,21 @@
 }
 
 .product-type {
-  font-size: 0.7rem;
-  color: #c79a4b;
+  font-size: 0.62rem;
+  color: var(--w2w-gold-deep);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .product-title {
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   font-weight: 500;
-  margin: 2px 0;
-  color: #1a1a1a;
+  line-height: 1.3;
+  margin: 1px 0;
+  color: var(--w2w-text-primary);
+  min-height: 2.6em;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -106,31 +129,33 @@
 }
 
 .product-price {
-  font-size: 0.95rem;
+  font-size: 0.84rem;
   font-weight: 700;
-  margin: 4px 0 0 0;
-  color: #1a1a1a;
+  margin: 2px 0 0;
+  color: var(--w2w-text-primary);
 }
 
-/* ── Shoe suggestion — PLAIN TEXT ONLY, NOT A PRODUCT CARD ── */
+/* ── Shoe suggestion — text only, not a product card ── */
 .shoe-suggestion {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: flex-start;
-  background: rgba(199, 154, 75, 0.08);
-  border-left: 2px solid #c79a4b;
-  border-radius: 8px;
-  padding: 9px 12px;
-  margin-bottom: 10px;
-  
+  background: var(--w2w-gold-light);
+  border-left: 2px solid var(--w2w-gold);
+  border-radius: var(--radius-xs);
+  padding: 7px 9px;
+  margin-bottom: 8px;
+
   svg {
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
-    margin-top: 2px;
-    color: #c79a4b;
+    margin-top: 1px;
+    color: var(--w2w-gold-deep);
   }
-  
+
   p {
-    font-size: 0.82rem;
+    font-size: 0.72rem;
     color: #7a5c1a;
     margin: 0;
     line-height: 1.4;
@@ -140,49 +165,52 @@
 /* ── Outfit styling note ── */
 .outfit-note {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: flex-start;
-  border-left: 2px solid #c79a4b;
-  padding-left: 10px;
-  margin-bottom: 12px;
-  
+  border-left: 2px solid var(--w2w-gold);
+  padding-left: 8px;
+  margin-bottom: 8px;
+
   svg {
+    width: 12px;
+    height: 12px;
     flex-shrink: 0;
     margin-top: 1px;
-    color: #c79a4b;
+    color: var(--w2w-gold-deep);
   }
-  
+
   p {
-    font-size: 0.82rem;
-    color: #6b6869;
+    font-size: 0.72rem;
+    color: var(--w2w-text-secondary);
     margin: 0;
     line-height: 1.4;
   }
 }
 
-/* ── View Details button ── */
+/* ── View Details button — pinned to the card bottom ── */
 .view-details-btn {
   width: 100%;
-  margin-top: 10px;
-  padding: 11px;
-  background: #1a1a1a;
+  margin-top: auto;
+  padding: 8px 10px;
+  min-height: 34px;
+  background: var(--w2w-charcoal);
   color: #fff;
   border: none;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.2s;
-  
+  transition: var(--transition-fast);
+
   &:active {
     opacity: 0.8;
     transform: scale(0.98);
   }
-  
+
   svg {
     flex-shrink: 0;
   }
