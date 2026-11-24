@@ -23,6 +23,7 @@ export type BudgetRange =
 
 export interface UserProfile {
   id: string;
+  username?: string;
   age?: number;
   name: string;
   email: string;

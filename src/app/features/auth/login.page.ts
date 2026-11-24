@@ -1,242 +1,270 @@
-import {
-  Component, OnInit, OnDestroy, AfterViewInit,
-  signal, computed, ViewChildren, QueryList, ElementRef, inject,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Router } from '@angular/router';
+import {
+  AuthError,
+  AUTH_MESSAGES,
+  SignupRequest,
+} from '../../core/models/auth.model';
+import {
+  BudgetRange,
+  BUDGET_OPTIONS,
+  FitType,
+  FIT_OPTIONS,
+  SkinTone,
+  SKIN_TONE_OPTIONS,
+  StylePreference,
+  STYLE_OPTIONS,
+} from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
+import { UserService } from '../../core/services/user.service';
 
-type Step = 'phone' | 'otp';
+type AuthMode = 'login' | 'signup';
+type Gender = 'male' | 'female' | 'unisex';
+
+const USERNAME_PATTERN = /^[a-z0-9_]{3,30}$/;
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [CommonModule],
+  animations: [
+    trigger('authSwitch', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(28px) scale(0.985)' }),
+        animate(
+          '420ms cubic-bezier(0.22, 1, 0.36, 1)',
+          style({ opacity: 1, transform: 'none' })
+        ),
+      ]),
+      transition(':leave', [
+        style({ position: 'absolute', top: 0, left: 0, width: '100%' }),
+        animate(
+          '240ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 0, transform: 'translateX(-22px) scale(0.985)' })
+        ),
+      ]),
+    ]),
+  ],
 })
-export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef<HTMLInputElement>>;
-
-  private router      = inject(Router);
+export class LoginPage {
+  private router = inject(Router);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
 
-  step          = signal<Step>('phone');
-  phoneNumber   = signal('');
-  isLoading     = signal(false);
-  error         = signal<string | null>(null);
-  resendSeconds = signal(0);
-  filledCount   = signal(0);
+  mode = signal<AuthMode>('login');
+  username = signal('');
+  password = signal('');
+  showPassword = signal(false);
+  error = signal<string | null>(null);
+  isLoading = signal(false);
 
-  private otpDigits   = ['', '', '', '', '', ''];
-  private resendTimer: any = null;
+  // Signup details (profile fields double as the new account's defaults)
+  fullName = signal('');
+  confirmPassword = signal('');
+  showConfirmPassword = signal(false);
+  gender = signal<Gender>('unisex');
+  age = signal<number | null>(null);
+  heightCm = signal<number | null>(null);
+  skinTone = signal<SkinTone | ''>('');
+  stylePreference = signal<StylePreference>('Minimalist / Modern');
+  fitType = signal<FitType>('Regular');
+  budgetRange = signal<BudgetRange>('₹2000 - ₹5000');
 
-  otpComplete = computed(() => this.filledCount() === 6);
+  readonly styleOptions = STYLE_OPTIONS;
+  readonly fitOptions = FIT_OPTIONS;
+  readonly skinToneOptions = SKIN_TONE_OPTIONS;
+  readonly budgetOptions = BUDGET_OPTIONS;
 
-  ngOnInit() {
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/home']);
-    }
-  }
+  readonly reduceMotion =
+    typeof window !== 'undefined' &&
+    !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  ngAfterViewInit() {
-    this.authService.initRecaptcha('recaptcha-container');
-  }
-
-  ngOnDestroy() {
-    if (this.resendTimer) clearInterval(this.resendTimer);
-  }
-
-  get fullPhone()  { return `+91${this.phoneNumber()}`; }
-  get phoneValid() { return this.phoneNumber().length === 10; }
-  get otpValue()   { return this.otpDigits.join(''); }
-
-  onPhoneInput(event: Event) {
-    const raw = (event.target as HTMLInputElement).value.replace(/\D/g, '');
-    this.phoneNumber.set(raw.slice(0, 10));
+  // ── Input handlers ───────────────────────────
+  onUsernameInput(event: Event) {
+    this.username.set(this.inputValue(event));
     this.error.set(null);
   }
 
-  async sendOtp() {
-    if (!this.phoneValid || this.isLoading()) return;
+  onPasswordInput(event: Event) {
+    this.password.set(this.inputValue(event));
+    this.error.set(null);
+  }
+
+  onFullNameInput(event: Event) {
+    this.fullName.set(this.inputValue(event));
+    this.error.set(null);
+  }
+
+  onConfirmPasswordInput(event: Event) {
+    this.confirmPassword.set(this.inputValue(event));
+    this.error.set(null);
+  }
+
+  onNumberInput(field: 'age' | 'heightCm', event: Event) {
+    const raw = this.inputValue(event);
+    const value = raw ? Number(raw) : null;
+    (field === 'age' ? this.age : this.heightCm).set(
+      value !== null && Number.isFinite(value) ? value : null
+    );
+  }
+
+  onGenderChange(event: Event) {
+    this.gender.set(this.inputValue(event) as Gender);
+  }
+
+  onSkinToneChange(event: Event) {
+    this.skinTone.set(this.inputValue(event) as SkinTone | '');
+  }
+
+  onStyleChange(event: Event) {
+    this.stylePreference.set(this.inputValue(event) as StylePreference);
+  }
+
+  onFitChange(event: Event) {
+    this.fitType.set(this.inputValue(event) as FitType);
+  }
+
+  onBudgetChange(event: Event) {
+    this.budgetRange.set(this.inputValue(event) as BudgetRange);
+  }
+
+  setGender(value: Gender) {
+    this.gender.set(value);
+  }
+
+  togglePassword() {
+    this.showPassword.update((value) => !value);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update((value) => !value);
+  }
+
+  // ── Mode transition ──────────────────────────
+  switchToSignup() {
+    this.error.set(null);
+    this.mode.set('signup');
+  }
+
+  switchToLogin() {
+    this.error.set(null);
+    this.mode.set('login');
+  }
+
+  // ── Submit ───────────────────────────────────
+  async submitLogin() {
+    const validationError = this.validateLogin();
+    if (validationError) {
+      this.error.set(validationError);
+      return;
+    }
+    if (this.isLoading()) return;
+
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await this.authService.sendOtp(this.fullPhone);
-      this.step.set('otp');
-      this.startResendTimer();
-      // Focus first box + open keyboard on mobile
-      setTimeout(() => this.focusBox(0), 300);
-    } catch (err: any) {
-      this.error.set(this.getFirebaseError(err));
-      // setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 500);
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
-
-  async verifyOtp() {
-    if (!this.otpComplete() || this.isLoading()) return;
-    this.isLoading.set(true);
-    this.error.set(null);
-    try {
-      await this.authService.verifyOtp(this.otpValue);
+      await this.authService.login({
+        username: this.normalizedUsername(),
+        password: this.password(),
+      });
+      this.userService.loadFromServer();
       await this.router.navigate(['/home']);
-    } catch (err: any) {
-      this.error.set(this.getFirebaseError(err));
-      this.clearOtp();
-      setTimeout(() => this.focusBox(0), 100);
+    } catch (err) {
+      this.error.set(this.errorMessage(err));
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  private getFirebaseError(err: any): string {
-    const code = err?.code || '';
-    const map: Record<string, string> = {
-      'auth/invalid-phone-number':      'Invalid phone number. Use +91XXXXXXXXXX format.',
-      'auth/too-many-requests':         'Too many attempts. Please try again later.',
-      'auth/invalid-verification-code': 'Incorrect OTP. Please try again.',
-      'auth/code-expired':              'OTP expired. Please request a new one.',
-      'auth/quota-exceeded':            'SMS quota exceeded. Try again later.',
-      'auth/captcha-check-failed':      'reCAPTCHA failed. Please refresh and try again.',
-      'auth/network-request-failed':    'Network error. Check your connection.',
-      'auth/operation-not-allowed':     'Phone auth not enabled. Contact support.',
-    };
-    return map[code] || err?.message || 'Something went wrong. Please try again.';
-  }
-
-  // ── OTP INPUT (mobile-friendly) ───────────
-  // Fires on every value change — works on all mobile keyboards
-  onOtpInput(event: Event, index: number) {
+  async submitSignup() {
+    const validationError = this.validateSignup();
+    if (validationError) {
+      this.error.set(validationError);
+      return;
+    }
     if (this.isLoading()) return;
-    const input = event.target as HTMLInputElement;
-    const raw   = input.value.replace(/\D/g, '');
 
-    // Empty = deletion handled by keydown, just sync
-    if (!raw) {
-      this.otpDigits[index] = '';
-      this.filledCount.set(this.countFilled());
-      return;
-    }
-
-    // Multiple digits = SMS autofill or paste → distribute across boxes
-    if (raw.length > 1) {
-      for (let i = 0; i < raw.length && (index + i) < 6; i++) {
-        this.otpDigits[index + i] = raw[i];
-        this.setBoxValue(index + i, raw[i]);
-      }
-      this.filledCount.set(this.countFilled());
-      const next = this.otpDigits.findIndex(d => d === '');
-      this.focusBox(next === -1 ? 5 : next);
-      if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
-      return;
-    }
-
-    // Single digit typed
-    const digit = raw.slice(-1);
-    this.otpDigits[index] = digit;
-    input.value = digit;              // force single character display
-    this.filledCount.set(this.countFilled());
+    this.isLoading.set(true);
     this.error.set(null);
-
-    // Move to next box (opens keyboard there on mobile)
-    if (index < 5) this.focusBox(index + 1);
-
-    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
-  }
-
-  // ── Keydown — handles Backspace + arrows ──
-  onOtpKeydown(event: KeyboardEvent, index: number) {
-    if (this.isLoading()) { event.preventDefault(); return; }
-    const key = event.key;
-
-    if (key === 'Backspace') {
-      if (this.otpDigits[index]) {
-        // Clear current box
-        this.otpDigits[index] = '';
-        this.setBoxValue(index, '');
-        this.filledCount.set(this.countFilled());
-      } else if (index > 0) {
-        // Already empty → go back and clear previous
-        event.preventDefault();
-        this.otpDigits[index - 1] = '';
-        this.setBoxValue(index - 1, '');
-        this.filledCount.set(this.countFilled());
-        this.focusBox(index - 1);
+    try {
+      // Availability is checked on submit; the backend unique index remains
+      // the final authority for concurrent registrations.
+      const available = await this.authService.checkUsername(
+        this.normalizedUsername()
+      );
+      if (!available) {
+        this.error.set(AUTH_MESSAGES.usernameTaken);
+        return;
       }
-      return;
-    }
 
-    if (key === 'ArrowLeft')  { event.preventDefault(); this.focusBox(index - 1); }
-    if (key === 'ArrowRight') { event.preventDefault(); this.focusBox(index + 1); }
-  }
+      const payload: SignupRequest = {
+        username: this.normalizedUsername(),
+        password: this.password(),
+        full_name: this.fullName().trim(),
+        gender: this.gender(),
+        age: this.age() ?? undefined,
+        height_cm: this.heightCm() ?? undefined,
+        skin_tone: this.skinTone() || undefined,
+        style_preference: this.stylePreference(),
+        fit_type: this.fitType(),
+        budget_range: this.budgetRange(),
+      };
 
-  onOtpPaste(event: ClipboardEvent) {
-    if (this.isLoading()) return;
-    event.preventDefault();
-    const pasted = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, 6);
-    if (!pasted) return;
-    for (let i = 0; i < 6; i++) {
-      this.otpDigits[i] = pasted[i] ?? '';
-      this.setBoxValue(i, this.otpDigits[i]);
-    }
-    this.filledCount.set(this.countFilled());
-    const next = this.otpDigits.findIndex(d => d === '');
-    this.focusBox(next === -1 ? 5 : next);
-    if (this.otpComplete()) setTimeout(() => this.verifyOtp(), 200);
-  }
-
-  private focusBox(i: number) {
-    if (i < 0 || i > 5) return;
-    const el = this.otpInputs.get(i)?.nativeElement;
-    if (el) {
-      el.focus();
-      // Force keyboard on mobile by clicking
-      el.click();
+      await this.authService.signup(payload);
+      this.userService.loadFromServer();
+      await this.router.navigate(['/home']);
+    } catch (err) {
+      this.error.set(this.errorMessage(err));
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
-  private setBoxValue(i: number, v: string) {
-    const el = this.otpInputs.get(i)?.nativeElement;
-    if (el) el.value = v;
+  goHelp() {
+    this.router.navigate(['/help']);
   }
 
-  private countFilled(): number {
-    return this.otpDigits.filter(d => d !== '').length;
+  goTerms() {
+    this.router.navigate(['/terms']);
   }
 
-  clearOtp() {
-    this.otpDigits = ['', '', '', '', '', ''];
-    this.filledCount.set(0);
-    setTimeout(() => this.otpInputs?.forEach(el => { el.nativeElement.value = ''; }));
+  // ── Validation & helpers ─────────────────────
+  private normalizedUsername(): string {
+    return this.username().trim().toLowerCase();
   }
 
-  startResendTimer() {
-    this.resendSeconds.set(60);
-    if (this.resendTimer) clearInterval(this.resendTimer);
-    this.resendTimer = setInterval(() => {
-      const s = this.resendSeconds() - 1;
-      this.resendSeconds.set(s);
-      if (s <= 0) clearInterval(this.resendTimer);
-    }, 1000);
+  private validateLogin(): string | null {
+    if (!this.username().trim() || !this.password()) {
+      return 'Enter your username and password.';
+    }
+    if (!USERNAME_PATTERN.test(this.normalizedUsername())) {
+      return AUTH_MESSAGES.invalidUsername;
+    }
+    return null;
   }
 
-  resendOtp() {
-    if (this.resendSeconds() > 0 || this.isLoading()) return;
-    this.clearOtp();
-    // this.authService.initRecaptcha('recaptcha-container');
-    setTimeout(() => this.sendOtp(), 300);
+  private validateSignup(): string | null {
+    if (!this.fullName().trim()) return 'Enter your full name.';
+    if (!this.username().trim()) return 'Choose a username.';
+    if (!USERNAME_PATTERN.test(this.normalizedUsername())) {
+      return AUTH_MESSAGES.invalidUsername;
+    }
+    if (this.password().length < 8) {
+      return 'Password must be at least 8 characters.';
+    }
+    if (this.password() !== this.confirmPassword()) {
+      return 'Passwords do not match.';
+    }
+    return null;
   }
 
-  goBack() {
-    this.step.set('phone');
-    this.error.set(null);
-    this.clearOtp();
-    if (this.resendTimer) clearInterval(this.resendTimer);
-    this.resendSeconds.set(0);
-    setTimeout(() => this.authService.initRecaptcha('recaptcha-container'), 300);
+  private errorMessage(err: unknown): string {
+    return err instanceof AuthError ? err.message : AUTH_MESSAGES.generic;
   }
-  goHelp()  { this.router.navigate(['/help']); }
-  goTerms() { this.router.navigate(['/terms']); }
+
+  private inputValue(event: Event): string {
+    return (event.target as HTMLInputElement | HTMLSelectElement).value;
+  }
 }

@@ -4,27 +4,19 @@ import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = async () => {
   const authService = inject(AuthService);
-  const router      = inject(Router);
+  const router = inject(Router);
 
-  // Already authenticated → allow
-  if (authService.isAuthenticated()) {
-    return true;
-  }
+  // Session restoration has already run before the first navigation; this is
+  // the fallback for an access token that expired while the app was open.
+  if (authService.isAuthenticated()) return true;
 
-  // Try refreshing the token once
   const refreshed = await authService.refreshAccessToken();
-  if (refreshed) {
-    return true;
-  }
-
-  // Not authenticated → redirect to login
-  return router.createUrlTree(['/login']);
+  return refreshed ? true : router.createUrlTree(['/login']);
 };
 
-// Guard for the login page — skip if already logged in
 export const guestGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
-  const router      = inject(Router);
+  const router = inject(Router);
 
   if (authService.isAuthenticated()) {
     return router.createUrlTree(['/home']);

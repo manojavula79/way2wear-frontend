@@ -1,129 +1,240 @@
-<!-- Invisible reCAPTCHA container — required by Firebase -->
-<div id="recaptcha-container"></div>
+<div class="auth-shell" [class.signup-mode]="mode() === 'signup'">
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
 
-<div class="login-shell">
-  <div class="login-card">
-
-    <div class="brand-header">
+  <main class="auth-card">
+    <header class="brand-header">
       <div class="brand-logo">W</div>
       <h1 class="brand-name">Way2Wear</h1>
-      <p class="brand-tagline">From idea to outfit in seconds</p>
-    </div>
-
-    <!-- STEP 1 — PHONE -->
-    <div class="step-block" *ngIf="step() === 'phone'">
-      <div class="step-heading">
-        <h2>Enter your phone number</h2>
-        <p>We'll send a verification code</p>
-      </div>
-
-      <div class="phone-row">
-        <div class="country-code">
-          <span class="flag">🇮🇳</span>
-          <span class="code">+91</span>
-        </div>
-        <div class="divider-v"></div>
-        <input
-          type="tel" class="phone-input"
-          placeholder="10-digit mobile number"
-          maxlength="10" inputmode="numeric"
-          [value]="phoneNumber()"
-          (input)="onPhoneInput($event)"
-          (keydown.enter)="sendOtp()"
-          autocomplete="tel-national"
-        />
-      </div>
-      <p class="error-text" *ngIf="error()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        {{ error() }}
+      <p class="brand-tagline">
+        {{ mode() === 'login' ? 'From idea to outfit in seconds' : 'Your style story starts here' }}
       </p>
+    </header>
 
-      <button class="cta-btn" [class.loading]="isLoading()"
-        [disabled]="!phoneValid || isLoading()" (click)="sendOtp()">
-        <span *ngIf="!isLoading()">Send OTP</span>
-        <span class="spinner" *ngIf="isLoading()"></span>
-      </button>
-      <div class="login-links">
-        <button type="button" class="link-btn" (click)="goHelp()">Help</button>
-        <span class="dot-sep">·</span>
-        <button type="button" class="link-btn" (click)="goTerms()">Terms & Conditions</button>
-      </div>
-      <p class="terms-note">By continuing, you agree to our Terms of Service</p>
+    <div class="form-viewport" [@.disabled]="reduceMotion">
+      @if (mode() === 'login') {
+        <section class="auth-form" @authSwitch aria-label="Log in">
+          <div class="step-heading">
+            <h2>Welcome back</h2>
+            <p>Sign in to continue styling.</p>
+          </div>
+
+          <label class="field-label" for="login-username">Username</label>
+          <div class="input-wrap">
+            <svg class="field-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <input id="login-username" name="username" type="text"
+              class="field-input" autocomplete="username" spellcheck="false"
+              placeholder="Your username" [value]="username()"
+              [disabled]="isLoading()" (input)="onUsernameInput($event)"
+              (keydown.enter)="submitLogin()" />
+          </div>
+
+          <label class="field-label" for="login-password">Password</label>
+          <div class="input-wrap">
+            <svg class="field-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="10.5" width="14" height="9.5" rx="2" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <input id="login-password" name="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="field-input" autocomplete="current-password"
+              placeholder="Your password" [value]="password()"
+              [disabled]="isLoading()" (input)="onPasswordInput($event)"
+              (keydown.enter)="submitLogin()" />
+            <button type="button" class="visibility-btn" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword()" (click)="togglePassword()">
+              @if (showPassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M10.7 5.3A9.7 9.7 0 0 1 12 5c5 0 8.5 4.4 9.5 6-.4.7-1.4 2-2.8 3.2M6.2 6.5C4.4 7.9 3.1 9.7 2.5 11c1 1.6 4.5 6 9.5 6 1.2 0 2.3-.2 3.2-.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 11C3.5 9.4 7 5 12 5s8.5 4.4 9.5 6c-1 1.6-4.5 6-9.5 6S3.5 12.6 2.5 11Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="11" r="2.8" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              }
+            </button>
+          </div>
+
+          @if (error()) {
+            <p class="error-text" role="alert">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              {{ error() }}
+            </p>
+          }
+
+          <button type="button" class="cta-btn" [class.loading]="isLoading()"
+            [disabled]="isLoading()" (click)="submitLogin()">
+            @if (!isLoading()) { <span>Log in</span> }
+            @else { <span class="spinner" aria-label="Logging in"></span> }
+          </button>
+
+          <p class="switch-line">
+            New to Way2Wear?
+            <button type="button" class="link-btn" (click)="switchToSignup()">Create an account</button>
+          </p>
+
+          <div class="login-links">
+            <button type="button" class="link-btn subtle" (click)="goHelp()">Help</button>
+            <span class="dot-sep">·</span>
+            <button type="button" class="link-btn subtle" (click)="goTerms()">Terms &amp; Conditions</button>
+          </div>
+          <p class="terms-note">By continuing, you agree to our Terms of Service</p>
+        </section>
+      } @else {
+        <section class="auth-form signup-form" @authSwitch aria-label="Create an account">
+          <button type="button" class="back-btn" [disabled]="isLoading()" (click)="switchToLogin()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back to login
+          </button>
+
+          <div class="step-heading">
+            <h2>Create your account</h2>
+            <p>A few details and you're ready to style.</p>
+          </div>
+
+          <label class="field-label" for="signup-name">Full name</label>
+          <input id="signup-name" name="fullName" type="text" class="field-input solo"
+            autocomplete="name" placeholder="e.g. Manoj Avula" [value]="fullName()"
+            [disabled]="isLoading()" (input)="onFullNameInput($event)" />
+
+          <label class="field-label" for="signup-username">Username</label>
+          <input id="signup-username" name="signupUsername" type="text" class="field-input solo"
+            autocomplete="username" spellcheck="false" placeholder="3-30 letters, numbers, underscores"
+            [value]="username()" [disabled]="isLoading()" (input)="onUsernameInput($event)" />
+
+          <label class="field-label" for="signup-password">Password</label>
+          <div class="input-wrap">
+            <input id="signup-password" name="signupPassword"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="field-input" autocomplete="new-password" placeholder="At least 8 characters"
+              [value]="password()" [disabled]="isLoading()" (input)="onPasswordInput($event)" />
+            <button type="button" class="visibility-btn" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword()" (click)="togglePassword()">
+              @if (showPassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  <path d="M10.7 5.3A9.7 9.7 0 0 1 12 5c5 0 8.5 4.4 9.5 6-.4.7-1.4 2-2.8 3.2M6.2 6.5C4.4 7.9 3.1 9.7 2.5 11c1 1.6 4.5 6 9.5 6 1.2 0 2.3-.2 3.2-.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 11C3.5 9.4 7 5 12 5s8.5 4.4 9.5 6c-1 1.6-4.5 6-9.5 6S3.5 12.6 2.5 11Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="11" r="2.8" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              }
+            </button>
+          </div>
+
+          <label class="field-label" for="signup-confirm">Confirm password</label>
+          <div class="input-wrap">
+            <input id="signup-confirm" name="confirmPassword"
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              class="field-input" autocomplete="new-password" placeholder="Repeat your password"
+              [value]="confirmPassword()" [disabled]="isLoading()"
+              (input)="onConfirmPasswordInput($event)" />
+            <button type="button" class="visibility-btn" [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showConfirmPassword()" (click)="toggleConfirmPassword()">
+              @if (showConfirmPassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 11C3.5 9.4 7 5 12 5s8.5 4.4 9.5 6c-1 1.6-4.5 6-9.5 6S3.5 12.6 2.5 11Z" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="12" cy="11" r="2.8" stroke="currentColor" stroke-width="1.6"/>
+                </svg>
+              }
+            </button>
+          </div>
+
+          <div class="profile-group">
+            <p class="group-title">Style profile <span>optional — used for better suggestions</span></p>
+
+            <div class="chip-row" role="group" aria-label="Gender">
+              @for (option of ['male', 'female', 'unisex']; track option) {
+                <button type="button" class="chip" [class.selected]="gender() === option"
+                  (click)="setGender($any(option))">{{ option }}</button>
+              }
+            </div>
+
+            <div class="field-row">
+              <div>
+                <label class="field-label" for="signup-age">Age</label>
+                <input id="signup-age" type="number" min="1" max="120" class="field-input solo"
+                  placeholder="Optional" [disabled]="isLoading()" (input)="onNumberInput('age', $event)" />
+              </div>
+              <div>
+                <label class="field-label" for="signup-height">Height (cm)</label>
+                <input id="signup-height" type="number" min="50" max="272" class="field-input solo"
+                  placeholder="Optional" [disabled]="isLoading()" (input)="onNumberInput('heightCm', $event)" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div>
+                <label class="field-label" for="signup-skin">Skin tone</label>
+                <select id="signup-skin" class="field-input solo" [disabled]="isLoading()" (change)="onSkinToneChange($event)">
+                  <option value="">Select</option>
+                  @for (option of skinToneOptions; track option) {
+                    <option [value]="option">{{ option }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="signup-fit">Fit type</label>
+                <select id="signup-fit" class="field-input solo" [disabled]="isLoading()" (change)="onFitChange($event)">
+                  @for (option of fitOptions; track option) {
+                    <option [value]="option" [selected]="option === fitType()">{{ option }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <label class="field-label" for="signup-style">Style preference</label>
+            <select id="signup-style" class="field-input solo" [disabled]="isLoading()" (change)="onStyleChange($event)">
+              @for (option of styleOptions; track option) {
+                <option [value]="option" [selected]="option === stylePreference()">{{ option }}</option>
+              }
+            </select>
+
+            <label class="field-label" for="signup-budget">Budget range</label>
+            <select id="signup-budget" class="field-input solo" [disabled]="isLoading()" (change)="onBudgetChange($event)">
+              @for (option of budgetOptions; track option) {
+                <option [value]="option" [selected]="option === budgetRange()">{{ option }}</option>
+              }
+            </select>
+          </div>
+
+          @if (error()) {
+            <p class="error-text" role="alert">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              {{ error() }}
+            </p>
+          }
+
+          <button type="button" class="cta-btn" [class.loading]="isLoading()"
+            [disabled]="isLoading()" (click)="submitSignup()">
+            @if (!isLoading()) { <span>Create account</span> }
+            @else { <span class="spinner" aria-label="Creating account"></span> }
+          </button>
+
+          <p class="terms-note">No email verification. You'll be signed in right away.</p>
+        </section>
+      }
     </div>
-
-    <!-- STEP 2 — OTP -->
-    <div class="step-block" *ngIf="step() === 'otp'">
-
-      <button class="back-btn" [disabled]="isLoading()" (click)="goBack()">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.7"
-            stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Change number
-      </button>
-
-      <div class="step-heading">
-        <h2>Verify OTP</h2>
-        <p>Sent to <strong>{{ fullPhone }}</strong></p>
-      </div>
-
-      <!-- OTP boxes — NO readonly so mobile keyboard opens -->
-      <div class="otp-row" [class.otp-disabled]="isLoading()" (paste)="onOtpPaste($event)">
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" autocomplete="one-time-code"
-          [disabled]="isLoading()"
-          (input)="onOtpInput($event, 0)"
-          (keydown)="onOtpKeydown($event, 0)" />
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [disabled]="isLoading()"
-          (input)="onOtpInput($event, 1)"
-          (keydown)="onOtpKeydown($event, 1)" />
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [disabled]="isLoading()"
-          (input)="onOtpInput($event, 2)"
-          (keydown)="onOtpKeydown($event, 2)" />
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [disabled]="isLoading()"
-          (input)="onOtpInput($event, 3)"
-          (keydown)="onOtpKeydown($event, 3)" />
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [disabled]="isLoading()"
-          (input)="onOtpInput($event, 4)"
-          (keydown)="onOtpKeydown($event, 4)" />
-        <input #otpInput type="tel" class="otp-box" maxlength="1"
-          inputmode="numeric" [disabled]="isLoading()"
-          (input)="onOtpInput($event, 5)"
-          (keydown)="onOtpKeydown($event, 5)" />
-      </div>
-
-      <p class="error-text" *ngIf="error()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        {{ error() }}
-      </p>
-
-      <button class="cta-btn" [class.loading]="isLoading()"
-        [disabled]="!otpComplete() || isLoading()" (click)="verifyOtp()">
-        <span *ngIf="!isLoading()">Verify & Continue</span>
-        <span class="spinner" *ngIf="isLoading()"></span>
-      </button>
-
-      <div class="resend-row">
-        <span *ngIf="resendSeconds() > 0" class="resend-wait">
-          Resend in <strong>{{ resendSeconds() }}s</strong>
-        </span>
-        <button *ngIf="resendSeconds() === 0" class="resend-btn"
-          [disabled]="isLoading()" (click)="resendOtp()">
-          Resend OTP
-        </button>
-      </div>
-    </div>
-  </div>
+  </main>
 
   <p class="login-footer">Way2Wear · AI Fashion Stylist</p>
 </div>

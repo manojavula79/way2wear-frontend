@@ -19,7 +19,8 @@ export interface LegacyUserProfile {
 // Shape returned by GET/PATCH /users/me
 interface ApiUserProfile {
   id: string;
-  phone: string;
+  username?: string | null;
+  phone?: string | null;
   full_name: string | null;
   gender: string | null;
   skin_tone: string | null;
@@ -149,6 +150,7 @@ export class UserService {
 
   private fromApi(r: ApiUserProfile): Partial<UserProfile> {
     return {
+      username: r.username ?? undefined,
       name: r.full_name ?? undefined,
       gender: (r.gender ?? undefined) as UserProfile['gender'],
       skinTone: (r.skin_tone ?? undefined) as UserProfile['skinTone'],

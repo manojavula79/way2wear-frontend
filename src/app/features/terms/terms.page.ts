@@ -27,7 +27,7 @@ import { CommonModule, Location } from '@angular/common';
         <p>Way2Wear is an AI fashion assistant that suggests outfit combinations based on your prompts and profile. Suggestions are for guidance only; styling is subjective and we do not guarantee any specific result.</p>
 
         <h2>3. Your account</h2>
-        <p>You sign in using your phone number and a one-time password. You are responsible for keeping access to your phone secure. You must be old enough to use the service under the laws of your country.</p>
+        <p>You create an account with a unique username and a password. Keep your password confidential and contact us if you believe your account has been compromised. You must be old enough to use the service under the laws of your country.</p>
 
         <h2>4. Shopping links</h2>
         <p>Product links may direct you to third-party retailers. Way2Wear may earn an affiliate commission on purchases at no extra cost to you. Prices, availability and product details are controlled by the retailer, not by us, and may change at any time.</p>
@@ -39,7 +39,7 @@ import { CommonModule, Location } from '@angular/common';
         <p>The AI can make mistakes. Always review important details — such as size, price and return policy — on the retailer’s page before purchasing.</p>
 
         <h2>7. Privacy</h2>
-        <p>We collect your phone number and the profile and styling information you choose to provide. We use it to operate and personalise the service and do not sell your personal data.</p>
+        <p>We store your username, a securely hashed password and the profile and styling information you choose to provide. We use it to operate and personalise the service and do not sell your personal data.</p>
 
         <h2>8. Changes</h2>
         <p>We may update these Terms from time to time. Continued use after an update means you accept the revised Terms.</p>
